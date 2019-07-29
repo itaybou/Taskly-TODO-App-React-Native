@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, Image, View } from 'react-native';
+import { CheckBox } from 'react-native-elements'
 
 export default class Item extends React.Component {
     constructor(props) {
@@ -10,19 +11,23 @@ export default class Item extends React.Component {
         const item = this.props.item;
         console.log(item);
         return (
-            <TouchableOpacity 
-                style={styles.item}
-                onPress={ () => this.props.toggleCompleted() }
-            >
-                <Text style={item.completed ? styles.completedItem : styles.notCompletedItem}>
-                    {item.task}
-                </Text>
-                <Button
-                    title="Remove"
-                    color={item.completed ? 'rgba(255, 0, 0, 1)' : 'rgba(200, 0, 0, 0.3)'}
-                    onPress={ () => this.props.removeItem() }
+            <View style={styles.item}>
+                <CheckBox
+                    style={styles.checkBox}
+                    checked={item.completed}
+                    checkedColor= {'red'}
+                    onPress={ () => this.props.toggleCompleted() }
+                    title={item.task}
                 />
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.deleteIcon}
+                    onPress={ () => this.props.removeItem() }>
+                    <Image 
+                    style={item.completed? styles.deleteIconCompleted : styles.deleteIconNotCompleted}
+                    source={require('../assets/remove-icon.png')}
+                    />
+                </TouchableOpacity>
+            </View>
         );
         }
 }
@@ -39,13 +44,29 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
 
-    completedItem: {
-        color: 'red',
-        textDecorationLine: 'line-through',
-        textDecorationStyle: 'solid'
+    checkBox: {
+        width: '100%',
+        flexDirection: 'row',
+        backgroundColor: 'white'
     },
 
-    notCompletedItem: {
-        color: '#313131'
+    deleteIcon: {
+        height: 25,
+        width: 25,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+
+    deleteIconCompleted: {
+        opacity: 1,
+        width:25,
+        resizeMode: 'contain'
+    },
+
+    deleteIconNotCompleted: {
+        opacity: 0.5,
+        width: 25,
+        resizeMode: 'contain'
     }
 });
