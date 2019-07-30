@@ -1,8 +1,8 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View, FlatList } from 'react-native';
+import { Platform, StyleSheet, View, FlatList, AsyncStorage } from 'react-native';
 import Header from './components/Header';
 import InputBar from './components/InputBar';
-import Item from './components/Item';
+import Task from './components/Task';
 
 const ios = 'ios';
 const android = 'android';
@@ -11,39 +11,63 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      input: "",
-      list: []
+      input: '',
+      taskList: []
     }
   };
 
-  addTask() {
-    if(this.state.input !== '') {
-      let list = this.state.list;
-      list.unshift({
-        id: list.length + 1,
-        task: this.state.input,
-        completed: false
-      });
-      this.setState({input: '', list})
-      console.log(list);
+  componentDidMount() {
+    this.retrieveData();
+  }
+
+  storeData = async () => {
+    try {
+      await AsyncStorage.setItem('state', JSON.stringify(this.state));
+    } catch (error) {
+      // Error saving data
     }
   }
 
-  removeItem(item) {
-    let list = this.state.list;
-    list = list.filter((listItem) => listItem.id !== item.id);
-    this.setState({list});
+  retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('state');
+      if (value !== null) {
+        this.setState(JSON.parse(value));
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
+  }
+
+  addTask() {
+    if(this.state.input !== '') {
+      let list = this.state.taskList;
+      list.unshift({
+        id: list.length + 1,
+        task: this.state.input,
+        date: "",
+        completed: false
+      });
+      this.setState({input: '', taskList: list})
+    }
+  }
+
+  removeTask(task) {
+    let list = this.state.taskList;
+    list = list.filter((listItem) => listItem.id !== task.id);
+    console.log(list);
+    this.setState({taskList: list});
   }
   
-  toggleCompleted(item) {
-    let list = this.state.list;
+  toggleCompleted(task) {
+    let list = this.state.taskList;
     list = list.map((listItem) => {
-      if(listItem.id === item.id) {
+      if(listItem.id === task.id) {
         listItem.completed = !listItem.completed;
       }
       return listItem;
     });
-    this.setState(list);
+    this.setState({taskList: list});
   }
 
   render() {
@@ -51,20 +75,35 @@ export default class App extends React.Component {
       return (
         <View style={styles.container}>
           {status_bar}
-          <Header title="TASKLY"/>
-          <InputBar 
+          <Header/>
+          <InputBar
+            input={this.state.input}
             textChange={ (input) => this.setState({input}) } 
-            addTask={ () => this.addTask() }
+            addTask={ () => {
+              this.addTask();
+              this.storeData();
+            }}
           />
           <FlatList 
-            data={this.state.list}
+            data={this.state.taskList}
             extraData = {this.state}
-            keyExtractor={(index, item) => index.toString()}
-            renderItem={ ({index, item}) => {
+            keyExtractor={(item, index) => item.id.toString()}
+            renderItem={ ({item}) => {
               return (
-                <Item item={item} toggleCompleted={ () => this.toggleCompleted(item) } removeItem={ () => this.removeItem(item) }/>
+                <Task 
+                  item={item} 
+                  toggleCompleted={ () => {
+                    this.toggleCompleted(item);
+                    this.storeData();
+                  }}
+                  removeTask={ () =>{
+                    this.removeTask(item);
+                    this.storeData();
+                  }}
+                />
               );
-            }}
+            }
+          }
           />
         </View>
     );
@@ -74,7 +113,7 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffff'
+    backgroundColor: '#FFFFFF'
   },
 
   status_bar: {

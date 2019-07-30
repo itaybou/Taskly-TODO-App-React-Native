@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 
 const InputBar = (props) => {
     return ( //Add clear task from text input on press
@@ -10,7 +10,11 @@ const InputBar = (props) => {
                 placeholderTextColor="#c7c7c7"
                 underlineColorAndroid='transparent'
                 onChangeText={ (input) => props.textChange(input) }/>
-            <TouchableOpacity style={styles.button} onPress={props.addTask}> 
+            <TouchableOpacity style={styles.button} onPress={props.addTask}>
+                <Image 
+                    style={styles.addIcon}
+                    source={require('../assets/add_icon.png')}
+                />
                 <Text style={styles.buttonText}>ADD</Text>
             </TouchableOpacity>
         </View>
@@ -28,7 +32,7 @@ const styles = StyleSheet.create({
     input: {
         backgroundColor: '#ededed',
         flex: 1,
-        fontSize: 18,
+        fontSize: 13,
         height: 40,
         margin: 2,
         textAlign: 'center',
@@ -37,15 +41,26 @@ const styles = StyleSheet.create({
 
     button: {
         width: 100,
-        backgroundColor: 'red',
+        margin: 2,
+        borderRadius: 50,
+        flexDirection: 'row',
+        backgroundColor: '#F68B5F',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        elevation: 8
     },
 
     buttonText: {
+        flex: 1,
         color: 'black',
-        fontSize: 20,
+        fontSize: 15,
         fontWeight: '900'
+    },
+
+    addIcon: {
+        flex: 1,
+        height: 20,
+        resizeMode: 'contain'
     }
 });
 
