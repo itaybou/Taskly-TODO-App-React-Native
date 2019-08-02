@@ -1,123 +1,48 @@
 import React from 'react';
-import { Platform, StyleSheet, View, FlatList, AsyncStorage } from 'react-native';
+import { Provider } from 'react-redux'
+import { Platform, StyleSheet, View } from 'react-native';
+import Navigator from './navigation/Navigator';
 import Header from './components/Header';
-import InputBar from './components/InputBar';
-import Task from './components/Task';
+import { PersistGate } from 'redux-persist/integration/react'
+import { data, persistor } from './data/Data';
+import { AppLoading } from 'expo';
 
 const ios = 'ios';
 const android = 'android';
 
 export default class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      input: '',
-      taskList: []
-    }
+
+  state = {
+    isReady: false
   };
 
-  componentDidMount() {
-    this.retrieveData();
-  }
-
-  storeData = async () => {
-    try {
-      await AsyncStorage.setItem('state', JSON.stringify(this.state));
-    } catch (error) {
-      // Error saving data
-    }
-  }
-
-  retrieveData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('state');
-      if (value !== null) {
-        this.setState(JSON.parse(value));
-      }
-    } catch (error) {
-      // Error retrieving data
-    }
-  }
-
-  addTask() {
-    if(this.state.input !== '') {
-      let list = this.state.taskList;
-      list.unshift({
-        id: list.length + 1,
-        task: this.state.input,
-        date: "",
-        completed: false
-      });
-      this.setState({input: '', taskList: list})
-    }
-  }
-
-  removeTask(task) {
-    let list = this.state.taskList;
-    list = list.filter((listItem) => listItem.id !== task.id);
-    console.log(list);
-    this.setState({taskList: list});
-  }
-  
-  toggleCompleted(task) {
-    let list = this.state.taskList;
-    list = list.map((listItem) => {
-      if(listItem.id === task.id) {
-        listItem.completed = !listItem.completed;
-      }
-      return listItem;
-    });
-    this.setState({taskList: list});
-  }
-
   render() {
-      const status_bar = Platform.OS == ios ? <View style={styles.status_bar}></View> : <View></View>;
-      return (
-        <View style={styles.container}>
-          {status_bar}
-          <Header/>
-          <InputBar
-            input={this.state.input}
-            textChange={ (input) => this.setState({input}) } 
-            addTask={ () => {
-              this.addTask();
-              this.storeData();
-            }}
-          />
-          <FlatList 
-            data={this.state.taskList}
-            extraData = {this.state}
-            keyExtractor={(item, index) => item.id.toString()}
-            renderItem={ ({item}) => {
-              return (
-                <Task 
-                  item={item} 
-                  toggleCompleted={ () => {
-                    this.toggleCompleted(item);
-                    this.storeData();
-                  }}
-                  removeTask={ () =>{
-                    this.removeTask(item);
-                    this.storeData();
-                  }}
-                />
-              );
-            }
-          }
-          />
-        </View>
+    const status_bar = Platform.OS == ios ? <View style={styles.status_bar}></View> : <View></View>;
+    
+    return (
+      <View style={styles.container}>
+        <Provider store={data}>
+          <PersistGate loading={ 
+              <AppLoading
+                startAsync={this._cacheResourcesAsync}
+                onFinish={() => this.setState({ isReady: true })}
+                onError={console.warn}
+              />} 
+            persistor={persistor}
+          >
+            {status_bar}
+            <Header />
+            <Navigator />
+          </PersistGate>
+        </Provider>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF'
-  },
-
-  status_bar: {
-    backgroundColor: '#66CDAA',
-    height: 35
+      flex: 1,
+      backgroundColor: '#FFFFFF'
   }
 });
