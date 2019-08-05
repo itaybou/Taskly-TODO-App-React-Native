@@ -1,5 +1,6 @@
 import React from 'react';
 import InputBar from './InputBar';
+import CategoryTitleBar from '../components/CategoryTitleBar';
 import TasksContainer from './TasksContainer'
 import { StyleSheet, View } from 'react-native';
 
@@ -12,7 +13,8 @@ export default class AppContainer extends React.Component {
         return (
             <View style={styles.container}>
                 <InputBar/>
-                <TasksContainer screen={this.props.screen} />
+                <CategoryTitleBar />
+                <TasksContainer navigation={this.props.navigation} />
             </View>
         );
     }

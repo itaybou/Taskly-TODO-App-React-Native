@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Keyboard } from 'react-native';
+import { maxTaskTitleLength } from '../data/Constants'
 import { Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import { addTask } from '../data/actions/Actions'
@@ -13,7 +14,7 @@ class InputBar extends React.Component {
     }
 
     addTask = (input) => {
-        this.props.dispatch(addTask(input, this.props.task_id));
+        this.props.dispatch(addTask(input, this.props.task_id, this.props.cat_id));
         this.setState({input: ''})
     }
 
@@ -30,7 +31,10 @@ class InputBar extends React.Component {
                     style={styles.button} 
                     onPress={ () => {
                         Keyboard.dismiss();
-                        (this.state.input !== '') ? this.addTask(this.state.input) 
+                        (this.state.input !== '') ? (
+                            (this.state.input.length <= maxTaskTitleLength) ?
+                            this.addTask(this.state.input) :
+                            Alert.alert("Task title length exceeded", `New tasks must have a maximum title length of ${maxTaskTitleLength} characters.`))
                         : Alert.alert("Task title is empty", "New tasks must have a title so you can identify them.");
                     }}>
                     <Icon
@@ -48,8 +52,8 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-
-        paddingHorizontal: 3
+        paddingHorizontal: 3,
+        paddingTop: 3
     },
 
     input: {
@@ -89,7 +93,8 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
     return ({
-    task_id: state.tasks.task_id
+    task_id: state.tasks.task_id,
+    cat_id: state.categories.curr_cat_id
 })};
 
 export default connect(mapStateToProps)(InputBar);

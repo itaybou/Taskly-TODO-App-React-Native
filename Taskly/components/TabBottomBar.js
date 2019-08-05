@@ -1,11 +1,10 @@
 import React from "react";
 import posed from "react-native-pose";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
-import { TabCount } from '../data/Constants'
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { TabCount, windowWidth, FilterTabs } from '../data/Constants'
 import { changeVisibility } from "../data/actions/Actions";
 import { connect } from 'react-redux'
 
-const windowWidth = Dimensions.get("window").width;
 const tabWidth = windowWidth / TabCount;
 
 const SpotLight = posed.View({
@@ -30,9 +29,7 @@ const TabBar = props => {
         getAccessibilityLabel,
         navigation
     } = props;
-
     const { routes, index: activeRouteIndex } = navigation.state;
-
     return (
         <View style={styles.container}>
             <View style={StyleSheet.absoluteFillObject}>

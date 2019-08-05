@@ -1,9 +1,13 @@
 import React from 'react';
-import { createBottomTabNavigator, createAppContainer} from 'react-navigation';
+import { createStackNavigator, createBottomTabNavigator, createAppContainer, createDrawerNavigator} from 'react-navigation';
 import TaskScreen from '../screens/TaskScreen';
+import DetailsScreen from '../screens/DetailsScreen';
 import TabBottomBar from '../components/TabBottomBar';
+import { HeaderBackground, HeaderLogo, HeaderDrawer, HeaderDetails } from '../components/Header';
+import CategoryDrawer from '../containers/CategoryDrawer';
 import { Icon } from 'react-native-elements'
-import { FilterTabs } from '../data/Constants'
+import { FilterTabs, windowWidth } from '../data/Constants'
+import EditTaskScreen from '../screens/EditTaskScreen';
 
 const getIcons = (navigation) => {
     const { routeName } = navigation.state;
@@ -17,7 +21,6 @@ const getIcons = (navigation) => {
     }
 }
 const commonNavigationOptions = ({ navigation }) => ({
-    header: null,
     tabBarIcon:({tintColor}) => {
         let iconName = getIcons(navigation);
         return (
@@ -37,9 +40,9 @@ const routeOptions = {
 };
 
 const TaskFilterTabs = createBottomTabNavigator({
-    [FilterTabs.ALL]: routeOptions,
-    [FilterTabs.ACTIVE]: routeOptions,
-    [FilterTabs.COMPLETED]: routeOptions,
+        [FilterTabs.ALL]: routeOptions,
+        [FilterTabs.ACTIVE]: routeOptions,
+        [FilterTabs.COMPLETED]: routeOptions
     },
     {
         tabBarComponent: TabBottomBar,
@@ -53,4 +56,30 @@ const TaskFilterTabs = createBottomTabNavigator({
     }
 );
 
-export default createAppContainer(TaskFilterTabs);
+const CategoryNavigator = createDrawerNavigator({
+        Home: TaskFilterTabs
+    }, 
+    {
+        contentComponent: CategoryDrawer,
+        drawerWidth: windowWidth/1.5
+});
+
+const navigationOptions = ({navigation}) => {
+    return {
+        headerBackground: <HeaderBackground/>,
+        headerTitle: <HeaderLogo/>,
+        headerLeft: <HeaderDrawer navigation={navigation}/>,
+        headerRight: <HeaderDetails navigation={navigation}/>
+    };
+}
+
+const StackNavigator = createStackNavigator({
+        Tasks: CategoryNavigator,
+        Details: DetailsScreen,
+        Edit_Task: EditTaskScreen
+    },
+    {
+        defaultNavigationOptions: navigationOptions
+});
+
+export default createAppContainer(StackNavigator);

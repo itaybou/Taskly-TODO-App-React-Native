@@ -1,42 +1,76 @@
 import React from 'react';
-import { StyleSheet, Image } from 'react-native';
+import { StyleSheet, Image, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Icon } from 'react-native-elements'
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
-const Header = (props) => {    // State-less component
-    return (
-        <LinearGradient
-            colors={['#FFE27C', '#ffd027']}
-            style={styles.header}
-            start={{ x: 1, y: 1 }}
-            end={{ x: 1, y: 0 }}
-        >
-            <Image 
-                style={styles.logo}
-                source={require('../assets/logo.png')}
-            />
-        </LinearGradient>
+export const HeaderBackground = (props) =>
+    <LinearGradient
+        colors={['#FFE27C', '#ffd027']}
+        style={styles.headerBackground}
+        start={{ x: 1, y: 1 }}
+        end={{ x: 1, y: 0 }}
+    />
+
+export const HeaderLogo = (props) =>
+    <Image 
+        style={styles.logo}
+        source={require('../assets/logo.png')}
+    />
+
+export const HeaderDrawer = (props) => {
+    const routeDetails = (props.navigation.state.routeName === "Details");
+    return routeDetails ? <View></View> :
+        (
+            <TouchableWithoutFeedback onPress={() => props.navigation.toggleDrawer()}>
+                <Icon
+                    containerStyle={styles.buttonLeft}
+                    size={24}
+                    name={'menu'}
+                    type={'feather'}
+                    color={'#000000'}
+                />
+            </TouchableWithoutFeedback>
     )
 }
 
-const styles = StyleSheet.create({
-    header: {
-        width: '100%',
-        height: 80,
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        paddingBottom: 8
-    },
+export const HeaderDetails = (props) => {
+    const routeDetails = (props.navigation.state.routeName === "Details");
+    return (
+        <TouchableWithoutFeedback onPress={() => 
+            routeDetails ?
+                props.navigation.navigate("Tasks") :
+                props.navigation.navigate("Details")
+            }
+        >
+            <Icon
+                containerStyle={styles.buttonRight}
+                size={24}
+                name={routeDetails ? 'arrow-left-circle' : 'help-circle'}
+                type={'feather'}
+                color={'#000000'}
+            />
+        </TouchableWithoutFeedback>
+    );
+}
 
-    title: {
-        fontSize: 25,
-        fontWeight: '900',
-        textTransform: 'uppercase'
+const styles = StyleSheet.create({
+    headerBackground: {
+        width: '100%',
+        height: '100%'
     },
 
     logo: {
+        flex: 1,
         height: 35,
         resizeMode: 'contain'
+    },
+
+    buttonLeft: {
+        marginStart: 10
+    },
+
+    buttonRight: {
+        marginEnd: 10
     }
 });
-
-export default Header;
