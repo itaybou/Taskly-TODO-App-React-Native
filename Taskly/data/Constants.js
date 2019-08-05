@@ -17,8 +17,13 @@ export const UserActionTypes = {
     ADD_CAT: 'ADD_CATEGORY',
     REMOVE_CAT: 'REMOVE_CATEGORY',
     SWITCH_CAT: 'SWITCH_CATEGORY',
-    CAT_COLOR: 'CHANGE_CATEGORY_COLOR'
+    CAT_COLOR: 'CHANGE_CATEGORY_COLOR',
+    ARRANGE_CAT: 'ARRANGE_CATEGORIES'
 }
+
+export const screens = ['Tasks', 'Details', 'Edit_Task'];
+
+export const additionalScreens = screens.splice(1);
 
 export const defaultCategoryDetails = {
     id: 0,

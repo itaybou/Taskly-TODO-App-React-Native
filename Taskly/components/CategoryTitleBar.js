@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import { clearCompleted } from '../data/actions/Actions'
+import { defaultCategoryDetails } from '../data/Constants'
 
 const CategoryTitleBar = props => { 
     return (
@@ -18,7 +19,21 @@ const CategoryTitleBar = props => {
                         type='feather'
                         color='#000000'
                     />
-                    <Text style={styles.informationText}> {props.taskList.length}</Text>
+                    <Text style={styles.informationText}> {props.taskCount}    </Text>
+                    <Icon
+                        size={12}
+                        name={'check'}
+                        type='feather'
+                        color='#000000'
+                    />
+                    <Text style={styles.informationText}> {props.completedCount}    </Text>
+                    <Icon
+                        size={8}
+                        name={'square'}
+                        type='feather'
+                        color='#000000'
+                    />
+                    <Text style={styles.informationText}> {props.taskCount - props.completedCount}</Text>
                 </View>
                 <View style={styles.filter}>
                     <View style={styles.filter}>
@@ -26,12 +41,7 @@ const CategoryTitleBar = props => {
                             <Text style={styles.informationText}>Clear completed</Text>
                         </TouchableOpacity>
                     </View>
-                    <Icon
-                        size={16}
-                        name={'filter'}
-                        type='feather'
-                        color='#000000'
-                    />
+                    
                 </View>
             </View>
         </View>
@@ -93,8 +103,8 @@ const styles = StyleSheet.create({
     filter: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        marginEnd: 12,
+        justifyContent: "center",
+        marginEnd: 5,
     },
 
     informationText: {
@@ -104,10 +114,13 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
+    const currentCategory = state.categories.curr_cat_id;
+    const defaultCategory = currentCategory === defaultCategoryDetails.id;
     return ({
-    taskList: state.tasks.taskList.filter(task => task.category_id === state.categories.curr_cat_id),
-    category_name: state.categories.catList.find(cat => cat.id === state.categories.curr_cat_id).title
-    
+    taskCount: defaultCategory ? state.tasks.taskList.length : state.tasks.taskList.filter(task => task.category_id === currentCategory).length,
+    category_name: state.categories.catList.find(cat => cat.id === currentCategory).title,
+    completedCount: defaultCategory ? state.tasks.taskList.filter(task =>task.completed).length : 
+                                    state.tasks.taskList.filter(task => task.category_id === currentCategory && task.completed).length,
 })};
 
 const mapDispatchToProps = dispatch => ({

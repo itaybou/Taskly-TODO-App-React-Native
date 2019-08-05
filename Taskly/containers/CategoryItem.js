@@ -8,7 +8,6 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import ColorPalette from 'react-native-color-palette'
 import { colorPicks, defaultCategoryDetails } from '../data/Constants'
 
-
 class CategoryItem extends React.PureComponent {
     constructor(props) {
         super(props);
@@ -23,6 +22,11 @@ class CategoryItem extends React.PureComponent {
 
     render() {
         return (
+            <TouchableOpacity 
+                onPress={() => this.props.switchCategory(this.props.item)}         
+                onLongPress={this.props.move}
+                onPressOut={this.props.moveEnd}
+            >
             <View style={[styles.categoryContainer, {backgroundColor: this.props.current_category === this.props.item.id ? '#F2F2F2' : '#FFFFFF'}]}>
                 <View style={[styles.categoryColorContainer, {backgroundColor: 'transparent'}]}>
                     {
@@ -73,10 +77,13 @@ class CategoryItem extends React.PureComponent {
                         </View>
                     </Modal>
                 </View>
-                <View style={styles.categoryNameContainer}>
-                    <Text style={styles.categoryTitle}>{this.props.item.title}</Text>
-                </View>
+
+                    <View style={styles.categoryNameContainer}>
+                        <Text style={styles.categoryTitle}>{this.props.item.title}</Text>
+                    </View>
+
             </View>
+            </TouchableOpacity>
         );
     }
 }
@@ -112,11 +119,15 @@ const styles = StyleSheet.create({
     },
 
     categoryNameContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        width: '100%',
         marginLeft: 10
     },
 
     categoryTitle: {
-        fontSize: 18
+        fontSize: 16
     }
 });
 

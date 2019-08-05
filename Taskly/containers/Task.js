@@ -62,6 +62,7 @@ class Task extends React.PureComponent {
                                 checkedColor= {'#E03A02'}
                                 title={item.title}
                                 onPress={this.toggleExpand.bind(this)}
+                                onLongPress={() => this.props.navigation.navigate("Edit_Task", {itemID: this.props.item.id})}
                                 onIconPress={ this.props.toggleCompleted.bind(this) }
                                 textStyle={item.completed ? styles.textCompleted : styles.textNotCompleted}
                             />

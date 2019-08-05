@@ -42,19 +42,33 @@ export const addTaskRating = (task) => {
     task
 })};
 
+export const setTaskRating = (task, rating) => {
+    return ({
+    type: UserActionTypes.RATING,
+    task,
+    rating
+})};
+
 export const changeVisibility = (screen) => {
     return ({
     type: UserActionTypes.FILTER,
-    screen
+    screen: screen.routeName
 })};
 
 export const clearCompleted = (taskList) => {
     return ({
     type: UserActionTypes.CLEAR,
-    taskList
 })};
 
 export const addCategory = (title, cat_id, color) => {
+    return ({
+        type: UserActionTypes.ADD_CAT,
+        id: cat_id,
+        title,
+        color: defaultCategoryColor
+})};
+
+export const removeCategory = (category) => {
     return ({
         type: UserActionTypes.ADD_CAT,
         id: cat_id,
@@ -76,9 +90,8 @@ export const changeCategoryColor = (color, category) => {
     color
 })};
 
-export const setTaskRating = (task, rating) => {
+export const arrangeCategories = (catList) => {
     return ({
-    type: UserActionTypes.RATING,
-    task,
-    rating
+    type: UserActionTypes.ARRANGE_CAT,
+    catList
 })};

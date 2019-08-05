@@ -34,6 +34,7 @@ class EditTaskScreen extends React.Component {
                         textStyle={this.props.item.completed ? styles.textCompleted : styles.textNotCompleted}
                     
                     />
+                    <Text style={{textDecorationLine: 'underline', textDecorationColor:this.props.category.color}}>Category: {this.props.category.title}</Text>
                     <View style={styles.ratingContainer}>
                         <Text style={styles.ratingText}>Importance:  </Text>
                         <Rating
@@ -110,7 +111,8 @@ const styles = StyleSheet.create({
     },
 
     details: {
-        width: '100%',
+        flex: 1,
+        width: '85%',
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
@@ -126,7 +128,8 @@ const styles = StyleSheet.create({
     },
 
     checkBox: {
-        width: '100%',
+        width: '85%',
+        flex: 0.1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
@@ -137,6 +140,7 @@ const styles = StyleSheet.create({
     },
 
     ratingContainer: {
+        flex: 0.1,
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
@@ -157,8 +161,10 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state, ownProps) => {
+    const item = state.tasks.taskList.find(task => task.id === ownProps.navigation.getParam('itemID'))
     return ({
-        item: state.tasks.taskList.find(task => task.id === ownProps.navigation.getParam('itemID'))
+        item: item,
+        category: state.categories.catList.find(cat => cat.id === item.category_id)
 })}
 
 const mapDispatchToProps = dispatch => ({

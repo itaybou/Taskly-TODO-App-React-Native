@@ -37,7 +37,6 @@ const TaskReducer = (state = {taskList:[], task_id:0}, action) => {
             }
 
         case UserActionTypes.RATING: {
-            console.log(state.taskList);
             return {taskList: state.taskList.map( task => (task.id === action.task.id) ? 
                     { ...task, rating: action.rating} : task), 
                     task_id: state.task_id }

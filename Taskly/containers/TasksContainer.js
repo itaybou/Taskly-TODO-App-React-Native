@@ -2,13 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
 import { toggleCompleted, removeTask } from '../data/actions/Actions'
-import { FilterTabs, windowWidth } from '../data/Constants'
+import { FilterTabs, windowWidth, defaultCategoryDetails } from '../data/Constants'
 import Task, {minimumTaskHeight} from './Task';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { Icon } from 'react-native-elements'
 
 
-class TaskList extends React.PureComponent {
+class TaskList extends React.Component {
     constructor(props) {
         super(props);
         this.state= {
@@ -34,7 +34,7 @@ class TaskList extends React.PureComponent {
             <View style={styles.container}>
                 <SwipeListView
                     data={ this.props.taskList }
-                    extraData = {this.props.state}
+                    extraData = {this.props.update}
                     keyExtractor={this.keyExtractor}
                     renderItem={ ({item}) => 
                         <Task
@@ -119,28 +119,34 @@ const styles = StyleSheet.create({
     },
 });
 
-const filterTaskList = (filter, taskList, categories) => {
-    switch(filter) {
+const filterTaskList = (filter, taskList, currentCategory) => {
+    const displayAllCategories = currentCategory === defaultCategoryDetails.id;
+    switch(filter || filter.routeName) {
         case FilterTabs.ALL:
-            return taskList.filter(task => task.category_id === categories.curr_cat_id);
+            return taskList.filter(task => (displayAllCategories || (task.category_id === currentCategory)));
         case FilterTabs.ACTIVE:
-            return taskList.filter(task => task.category_id === categories.curr_cat_id && !task.completed);
+            return taskList.filter(task => (displayAllCategories || (task.category_id === currentCategory)) && !task.completed);
         case FilterTabs.COMPLETED:
-            return taskList.filter(task => task.category_id === categories.curr_cat_id && task.completed);
+            return taskList.filter(task => (displayAllCategories || (task.category_id === currentCategory)) && task.completed);
         default:
             return taskList;
     }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
+    console.log(state);
     return ({
-    state: state,
-    taskList: filterTaskList(state.visibility.routeName, state.tasks.taskList, state.categories)
+    update: {
+        visibility: state.visibility,
+        category: state.categories.curr_cat_id,
+        catList:  ownProps.taskList
+    },
+    taskList: filterTaskList(state.visibility, state.tasks.taskList, state.categories.curr_cat_id)
 })};
 
 const mapDispatchToProps = dispatch => ({
-    toggleTask: task => dispatch( toggleCompleted(task)), 
-    removeTask: task => dispatch( removeTask(task) )
+    toggleTask: task => dispatch(toggleCompleted(task)), 
+    removeTask: task => dispatch(removeTask(task))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(TaskList);

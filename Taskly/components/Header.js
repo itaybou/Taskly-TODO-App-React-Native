@@ -3,6 +3,7 @@ import { StyleSheet, Image, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Icon } from 'react-native-elements'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { additionalScreens } from '../data/Constants'
 
 export const HeaderBackground = (props) =>
     <LinearGradient
@@ -19,8 +20,8 @@ export const HeaderLogo = (props) =>
     />
 
 export const HeaderDrawer = (props) => {
-    const routeDetails = (props.navigation.state.routeName === "Details");
-    return routeDetails ? <View></View> :
+    const additional = additionalScreens.includes(props.navigation.state.routeName);
+    return additional ? <View></View> :
         (
             <TouchableWithoutFeedback onPress={() => props.navigation.toggleDrawer()}>
                 <Icon
@@ -35,10 +36,11 @@ export const HeaderDrawer = (props) => {
 }
 
 export const HeaderDetails = (props) => {
-    const routeDetails = (props.navigation.state.routeName === "Details");
+    console.log(props.navigation.state.routeName);
+    const subScreen = additionalScreens.includes(props.navigation.state.routeName);
     return (
         <TouchableWithoutFeedback onPress={() => 
-            routeDetails ?
+            subScreen ?
                 props.navigation.navigate("Tasks") :
                 props.navigation.navigate("Details")
             }
@@ -46,7 +48,7 @@ export const HeaderDetails = (props) => {
             <Icon
                 containerStyle={styles.buttonRight}
                 size={24}
-                name={routeDetails ? 'arrow-left-circle' : 'help-circle'}
+                name={subScreen ? 'arrow-left-circle' : 'help-circle'}
                 type={'feather'}
                 color={'#000000'}
             />
