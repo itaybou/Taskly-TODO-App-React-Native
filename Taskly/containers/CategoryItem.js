@@ -1,94 +1,77 @@
 import React from 'react';
-import { StyleSheet, View, Text, Button} from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import { connect } from 'react-redux'
 import {switchCategory, changeCategoryColor } from '../data/actions/Actions'
 import { Icon } from 'react-native-elements'
-import Modal from "react-native-modal";
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import ColorPalette from 'react-native-color-palette'
-import { colorPicks, defaultCategoryDetails } from '../data/Constants'
+import { defaultCategoryDetails } from '../data/Constants'
+import tinycolor from 'tinycolor2';
+import ColorPickModal from '../components/modals/ColorPickModal'
+import { withTheme } from '../data/Theme'
 
 class CategoryItem extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            isColorPickVisible: false
+            isColorPickVisible: false,
         }
     }
 
+    switchCategory = () => {
+        this.props.switchCategory(this.props.item);
+        this.props.closeDrawer();
+    }
+
+    setCategoryColor = (color) => {
+        this.props.changeCategoryColor(tinycolor(color).toHslString(), this.props.item);
+        this.toggleColorPick();
+    };
+
     toggleColorPick = () => {
-        this.setState({ isColorPickVisible: !this.state.isModalVisible });
+        this.setState({ isColorPickVisible: !this.state.isColorPickVisible });
     };
 
     render() {
+        const theme = this.props.theme;
+        const style = styles(theme);
         return (
             <TouchableOpacity 
-                onPress={() => this.props.switchCategory(this.props.item)}         
+                onPress={this.switchCategory.bind(this)}     
                 onLongPress={this.props.move}
                 onPressOut={this.props.moveEnd}
             >
-            <View style={[styles.categoryContainer, {backgroundColor: this.props.current_category === this.props.item.id ? '#F2F2F2' : '#FFFFFF'}]}>
-                <View style={[styles.categoryColorContainer, {backgroundColor: 'transparent'}]}>
-                    {
-                        this.props.item.id !== defaultCategoryDetails.id ?
-                            <TouchableOpacity onPress={this.toggleColorPick}>
-                                <Icon
-                                    containerStyle={styles.taskIcons}
-                                    size={50}
-                                    name={'primitive-dot'}
-                                    type='octicon'
-                                    color={this.props.item.color}
-                                />
-                            </TouchableOpacity> :
-                            <Icon
-                                containerStyle={styles.taskIcons}
-                                size={22}
-                                name={'bookmark'}
-                                type='feather'
-                                color={'#000000'}
-                            />
-                    }
-                    <Modal 
-                        isVisible={this.state.isColorPickVisible}
-                        onBackdropPress={() => this.setState({ isColorPickVisible: false })}
-                        animationIn="slideInLeft"
-                        animationOut="slideOutRight"
-                    >
-                        <View style={styles.content}>
-                            <ColorPalette
-                                onChange={color => {
-                                        this.props.changeCategoryColor(color, this.props.item);
-                                        this.setState({ isColorPickVisible: false });
-                                    }
-                                }
-                                value={this.props.item.color}
-                                colors={colorPicks}
-                                title={"Choose category color:"}
-                                icon={
+                <View style={[style.categoryContainer, {backgroundColor: this.props.current_category === this.props.item.id ? theme.background_selected : theme.background}]}>
+                    <View style={[style.categoryColorContainer, {backgroundColor: 'transparent'}]}>
+                        {
+                            this.props.item.id !== defaultCategoryDetails.id ?
+                                <TouchableOpacity onPress={this.toggleColorPick}>
                                     <Icon
-                                        size={20}
-                                        containerStyle={{opacity: 0.8, shadowOpacity: 0.5, shadowRadius: 2}}
-                                        name={'check'}
-                                        type='feather'
-                                        color={'black'}
+                                        containerStyle={style.taskIcons}
+                                        size={50}
+                                        name={'primitive-dot'}
+                                        type='octicon'
+                                        color={this.props.item.color}
                                     />
-                                }
-                            />
-                        </View>
-                    </Modal>
-                </View>
-
-                    <View style={styles.categoryNameContainer}>
-                        <Text style={styles.categoryTitle}>{this.props.item.title}</Text>
+                                </TouchableOpacity> :
+                                <Icon
+                                    containerStyle={style.taskIcons}
+                                    size={22}
+                                    name={'bookmark'}
+                                    type='feather'
+                                    color={theme.icons}
+                                />
+                        }
                     </View>
-
-            </View>
+                    <View style={style.categoryNameContainer}>
+                        <Text style={style.categoryTitle} numberOfLines={1}>{this.props.item.title}</Text>
+                    </View>
+                </View>
+                <ColorPickModal isVisible={this.state.isColorPickVisible} setColor={this.setCategoryColor} toggle={this.toggleColorPick} defaultColor={this.props.item.color} title={this.props.item.title}/>
             </TouchableOpacity>
         );
     }
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
     categoryContainer: {
         width: '100%',
         height: 42,
@@ -97,16 +80,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         borderBottomWidth: 1,
-        borderBottomColor: '#DDD'
+        borderBottomColor: theme.separator
     },
 
     content: {
         height: '35%',
-        backgroundColor: 'white',
+        backgroundColor: theme.background,
         padding: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 4,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        borderRadius: 10,
         borderColor: 'rgba(0, 0, 0, 0.1)',
     },
 
@@ -127,7 +110,8 @@ const styles = StyleSheet.create({
     },
 
     categoryTitle: {
-        fontSize: 16
+        color: theme.primary_text,
+        fontSize: 14
     }
 });
 
@@ -141,4 +125,4 @@ const mapDispatchToProps = (dispatch) => ({
     changeCategoryColor: (color, category) => dispatch(changeCategoryColor(color, category))
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(CategoryItem);
+export default connect(mapStateToProps, mapDispatchToProps)(withTheme(CategoryItem));

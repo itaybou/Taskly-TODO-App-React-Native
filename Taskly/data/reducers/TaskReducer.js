@@ -1,6 +1,11 @@
 import { UserActionTypes } from '../Constants'
 
-const TaskReducer = (state = {taskList:[], task_id:0}, action) => {
+const initial_state = {
+    taskList: [],
+    task_id: 0
+}
+
+const TaskReducer = (state = initial_state, action) => {
     switch(action.type) {
         case UserActionTypes.ADD:
             return {
@@ -13,8 +18,9 @@ const TaskReducer = (state = {taskList:[], task_id:0}, action) => {
                         due_date: action.due_date,
                         completed_date: action.completed_date,
                         description: action.description,
-                        rating: action.rating,
+                        importance: action.importance,
                         category_id: action.category_id,
+                        notification_id: action.notification_id,
                         completed: false
                     }, ...state.taskList
                 ],
@@ -24,6 +30,12 @@ const TaskReducer = (state = {taskList:[], task_id:0}, action) => {
         case UserActionTypes.REMOVE: 
             return { taskList: state.taskList.filter( task => task.id !== action.task.id),
                     task_id: state.task_id }
+
+        case UserActionTypes.UNDO_REMOVE: {
+                const undoTaskList = state.taskList.slice();
+                undoTaskList.splice(action.indexedTask.index, 0, action.indexedTask.task);
+                return { taskList: undoTaskList, task_id: state.task_id }
+            }
 
         case UserActionTypes.TOGGLE: {
             return { taskList: state.taskList.map( task => (task.id === action.task.id) ? 
@@ -35,11 +47,28 @@ const TaskReducer = (state = {taskList:[], task_id:0}, action) => {
             return { taskList: state.taskList.filter(task => !task.completed), 
                     task_id: state.task_id}
             }
+        
+        case UserActionTypes.UNDO_CLEAR: {
+            return { taskList: state.taskList.concat(action.completed), 
+                task_id: state.task_id}
+        }
 
-        case UserActionTypes.RATING: {
+        case UserActionTypes.IMPORTANCE: {
             return {taskList: state.taskList.map( task => (task.id === action.task.id) ? 
-                    { ...task, rating: action.rating} : task), 
+                    { ...task, importance: action.importance} : task), 
                     task_id: state.task_id }
+        }
+
+        case UserActionTypes.DUE_DATE: {
+            return {taskList: state.taskList.map( task => (task.id === action.task.id) ? 
+                    { ...task, due_date: action.date} : task), 
+                    task_id: state.task_id }
+        }
+
+        case UserActionTypes.SET_NOTIFICATION: {
+            return {taskList: state.taskList.map( task => (task.id === action.task.id) ? 
+                { ...task, notification_id: action.notification_id} : task), 
+                task_id: state.task_id }
         }
                     
         default:

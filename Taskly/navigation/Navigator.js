@@ -47,8 +47,6 @@ const TaskFilterTabs = createBottomTabNavigator({
     {
         tabBarComponent: TabBottomBar,
         tabBarOptions: {
-            activeTintColor: "#eeeeee",
-            inactiveTintColor: "#222222",
             tabBarPosition: 'bottom',
             animationEnabled: true,
             swipeEnabled: true,

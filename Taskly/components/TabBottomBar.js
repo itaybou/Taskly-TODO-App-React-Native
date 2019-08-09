@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { TabCount, windowWidth, FilterTabs } from '../data/Constants'
 import { changeVisibility } from "../data/actions/Actions";
 import { connect } from 'react-redux'
+import { withTheme } from '../data/Theme'
 
 const tabWidth = windowWidth / TabCount;
 
@@ -19,32 +20,37 @@ const IconScaler = posed.View({
 });
 
 const TabBar = props => {
+    const theme = props.theme;
+    const style = styles(theme);
     const {
         renderIcon,
         getLabelText,
-        activeTintColor,
-        inactiveTintColor,
         onTabPress,
         onTabLongPress,
         getAccessibilityLabel,
         navigation
     } = props;
+
+    const tint = {
+        activeTintColor: theme.activeTintColor,
+        inactiveTintColor: theme.inactiveTintColor
+    }
     const { routes, index: activeRouteIndex } = navigation.state;
     return (
-        <View style={styles.container}>
+        <View style={style.container}>
             <View style={StyleSheet.absoluteFillObject}>
-                <SpotLight style={styles.spotLight} pose={`route${activeRouteIndex}`}>
-                    <View style={styles.spotLightInner} />
+                <SpotLight style={style.spotLight} pose={`route${activeRouteIndex}`}>
+                    <View style={style.spotLightInner} />
                 </SpotLight>
             </View>
             {routes.map((route, routeIndex) => {
                 const isRouteActive = routeIndex === activeRouteIndex;
-                const tintColor = isRouteActive ? activeTintColor : inactiveTintColor;
+                const tintColor = isRouteActive ? tint.activeTintColor : tint.inactiveTintColor;
     
             return (
                 <TouchableOpacity
                     key={routeIndex}
-                    style={styles.tabButton}
+                    style={style.tabButton}
                     onPress={() => {
                         props.dispatch(changeVisibility(route));
                         onTabPress({ route });
@@ -55,10 +61,10 @@ const TabBar = props => {
                     }}
                     accessibilityLabel={ getAccessibilityLabel({ route }) }
                 >
-                    <IconScaler style={styles.scaler} pose={isRouteActive ? "active" : "inactive"}>
+                    <IconScaler style={style.scaler} pose={isRouteActive ? "active" : "inactive"}>
                         {renderIcon({ route, focused: isRouteActive, tintColor })}
                     </IconScaler>
-                    <Text style={styles.tabText}>{getLabelText({ route })}</Text>
+                    <Text style={style.tabText}>{getLabelText({ route })}</Text>
                 </TouchableOpacity>
             );
             })}
@@ -66,9 +72,9 @@ const TabBar = props => {
     );
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
     container: { 
-        backgroundColor: '#fcfcfc',
+        backgroundColor: theme.tab_bar,
         flexDirection: "row", 
         height: 55, 
         elevation: 2,
@@ -82,6 +88,7 @@ const styles = StyleSheet.create({
     },
 
     tabText: {
+        color: theme.primary_text,
         fontSize: 12,
         flex: 1,
     },
@@ -96,8 +103,7 @@ const styles = StyleSheet.create({
     spotLightInner: {
         width: tabWidth/1.5,
         height: 50, 
-        backgroundColor: "#ee0000",
-        opacity:0.5,
+        backgroundColor: theme.tintHighlight,
         borderRadius: 50
     },
 
@@ -109,4 +115,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default connect()(TabBar);
+export default connect()(withTheme(TabBar));

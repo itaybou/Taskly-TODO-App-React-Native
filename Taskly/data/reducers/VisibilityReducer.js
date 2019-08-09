@@ -1,6 +1,8 @@
-import { UserActionTypes, FilterTabs } from '../Constants'
+import { UserActionTypes, FilterTabs, defaultFilter } from '../Constants'
 
-export default VisibilityReducer = (state = FilterTabs.ALL, action) => {
+const initial_state = defaultFilter;
+
+export default VisibilityReducer = (state = initial_state, action) => {
     switch(action.type) {
         case UserActionTypes.FILTER:
             return action.screen;

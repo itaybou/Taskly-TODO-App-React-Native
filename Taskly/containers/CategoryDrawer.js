@@ -1,72 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, Text, InteractionManager, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Text, InteractionManager, TouchableOpacity, KeyboardAvoidingView, Dimensions, Keyboard} from 'react-native';
 import { Icon, Header } from 'react-native-elements';
-import { ScrollView, FlatList, TextInput } from 'react-native-gesture-handler';
 import { connect } from 'react-redux'
 import CategoryItem from './CategoryItem'
-import Modal from "react-native-modal";
-import { addCategory, arrangeCategories } from '../data/actions/Actions'
+import { addCategory, arrangeCategories, changeTheme } from '../data/actions/Actions'
 import DraggableFlatList from 'react-native-draggable-flatlist'
+import { withTheme, THEME_TYPE } from '../data/Theme'
+import AddCategoryModal from '../components/modals/AddCategoryModal'
 
-class AddCategoryModel extends React.PureComponent {
-    constructor(props) {
-        super(props);
-        this.state = {
-            input: '',
-            color: 'transparent'
-        }
-    }
-
-    addCategory = (input) => {
-        this.props.addCategory(this.state.input, this.props.categoryId, 'transparent');
-        this.closeModal();
-    }
-
-    closeModal = () => {
-        this.setState({input: '', color: 'transparent'});
-        this.props.toggleModal();
-    }
-
-    render() {
-        return (
-            <Modal 
-                isVisible={this.props.isAddVisible}
-                onBackdropPress={this.closeModal}
-                animationIn="slideInLeft"
-                animationOut="slideOutRight"
-            >
-                <View style={styles.content}>
-                    <View style={{borderBottomColor: '#A0A0A0', borderBottomWidth: 1, borderBottomEndRadius: 5}}>
-                        <TextInput
-                            style={{width: '80%', fontSize: 18, }}
-                            value={this.state.input}
-                            placeholder="Enter category name"
-                            placeholderTextColor="#c7c7c7"
-                            underlineColorAndroid='transparent'
-                            onChangeText={ (input) => this.setState({input: input}) }
-                        />
-                    </View>
-                    <View style={{width: '100%', flex:1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <TouchableOpacity onPress={this.closeModal}>
-                            <Icon
-                                name='x'
-                                type='feather'
-                                color='#6B3C2A'
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={this.addCategory}>
-                            <Icon
-                                name='check'
-                                type='feather'
-                                color='#6B3C2A'
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-        )
-    }
-}
 
 class CategoryDrawer extends React.Component {
     constructor(props) {
@@ -75,6 +16,10 @@ class CategoryDrawer extends React.Component {
             didFinishInitialAnimation: false,
             isAddVisible: false
         };
+    }
+
+    componentWillMount() {
+        this.props.screenProps.toggleTheme();
     }
 
     componentDidMount() {
@@ -89,22 +34,32 @@ class CategoryDrawer extends React.Component {
         this.setState({ isAddVisible: !this.state.isAddVisible });
     };
 
+    
+    changeTheme = () => {
+        const next_theme = this.props.theme.name === THEME_TYPE.LIGHT ? THEME_TYPE.DARK : THEME_TYPE.LIGHT;
+        this.props.changeTheme(next_theme);
+        this.props.screenProps.toggleTheme();
+        this.props.navigation.closeDrawer();
+    }
+
     keyExtractor = (item, index) => item.id.toString();
 
     render() {
+        const theme = this.props.theme;
+        const style = styles(theme);
         return (
-            <View style={{flex: 1}}>
+            <View style={{flex: 1, backgroundColor: theme.background}}>
                 <Header 
                     placement="left"
                     barStyle="light-content" // or directly
                     containerStyle={{
-                        backgroundColor: '#DDDDDD',
+                        backgroundColor: theme.separator,
                         justifyContent: 'space-around',
                         flex: 0.1
                     }}
                 >
                 <View></View>
-                <Text style={{fontSize: 20, fontWeight: 'bold'}}>Categories</Text>
+                <Text style={{color: theme.primary_text, fontSize: 20, fontWeight: 'bold'}}>Categories</Text>
                 <View></View>
                 </Header>
                 <DraggableFlatList 
@@ -120,24 +75,35 @@ class CategoryDrawer extends React.Component {
                             move={move}
                             moveEnd={moveEnd}
                             isDragged={isDragged}
+                            closeDrawer={this.props.navigation.closeDrawer}
                         />
                     }
                 />
-                <View style={{flex: 0.2, alignItems: 'flex-end', justifyContent: 'flex-end'}}>
+                <View style={{flex: 0.2, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginStart: 10, backgroundColor: theme.background}}>    
+                <TouchableOpacity 
+                        style={style.button} 
+                        onPress={this.changeTheme}>
+                        <Icon
+                            name='ios-contrast'
+                            type='ionicon'
+                            color={theme.button_icons}
+                        />
+                    </TouchableOpacity>
                     <TouchableOpacity 
-                        style={styles.button} 
+                        style={style.button} 
                         onPress={this.toggleAddCategoryModal}>
                         <Icon
                             name='plus'
                             type='feather'
-                            color='#6B3C2A'
+                            color={theme.button_icons}
                         />
                     </TouchableOpacity>
-                    <AddCategoryModel 
+                    <AddCategoryModal 
                         categoryId={this.props.nextCategoryId} 
                         isAddVisible={this.state.isAddVisible} 
                         toggleModal={this.toggleAddCategoryModal}
                         addCategory={this.props.addCategory}
+                        changeColor={this.props.changeCategoryColor}
                     />
                 </View>
             </View>
@@ -145,7 +111,7 @@ class CategoryDrawer extends React.Component {
     }
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
     button: {
         width: 50,
         height: 50,
@@ -153,14 +119,14 @@ const styles = StyleSheet.create({
         marginBottom: 25,
         borderRadius: 50,
         flexDirection: 'row',
-        backgroundColor: '#F68B5F',
+        backgroundColor: theme.accent_secondary,
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 8
     },
 
     content: {
-        height: '20%',
+        height: Dimensions.get('window').height * 0.25,
         backgroundColor: 'white',
         padding: 22,
         justifyContent: 'center',
@@ -168,18 +134,34 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderColor: 'rgba(0, 0, 0, 0.1)',
     },
+
+    container: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        flex: 1,
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
+    },
+
+    modalContainer: {
+        height: Dimensions.get('window').height * .3,
+        width: Dimensions.get('window').width,
+        backgroundColor: 'red'
+    }
 });
 
 const mapStateToProps = (state) => {
     return ({
     nextCategoryId: state.categories.cat_id,
-    catList: state.categories.catList
+    catList: state.categories.catList,
 })};
 
 const mapDispatchToProps = dispatch => ({
-    addCategory: (title, id, color) => dispatch( addCategory(title, id, color)),
-    arrangeCategories: (data) => dispatch(arrangeCategories(data))
-})
+    addCategory: (title, id, color) => dispatch(addCategory(title, id, color)),
+    arrangeCategories: (data) => dispatch(arrangeCategories(data)),
+    changeCategoryColor: (color, category) => dispatch(changeCategoryColor(color, category)),
+    changeTheme: (themeName) => dispatch(changeTheme(themeName))
+});
 
-
-export default connect(mapStateToProps, mapDispatchToProps)(CategoryDrawer);
+export default connect(mapStateToProps, mapDispatchToProps)(withTheme(CategoryDrawer));

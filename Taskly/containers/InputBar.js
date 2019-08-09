@@ -3,6 +3,7 @@ import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Keyboard } from '
 import { maxTaskTitleLength } from '../data/Constants'
 import { Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
+import { withTheme } from '../data/Theme'
 import { addTask } from '../data/actions/Actions'
 
 class InputBar extends React.Component {
@@ -19,16 +20,19 @@ class InputBar extends React.Component {
     }
 
     render () {
+        const theme = this.props.theme;
+        const style = styles(theme);
         return ( //Add clear task from text input on press
-            <View style={styles.inputContainer}>
-                <TextInput style={styles.input}
+            <View style={style.inputContainer}>
+                <TextInput style={style.input}
                     value={this.state.input}
                     placeholder="Enter A new task"
-                    placeholderTextColor="#c7c7c7"
+                    placeholderTextColor={theme.placeholder_text}
                     underlineColorAndroid='transparent'
+                    selectionColor={theme.accent_primary}
                     onChangeText={ (input) => this.setState({input}) }/>
                 <TouchableOpacity 
-                    style={styles.button} 
+                    style={style.button} 
                     onPress={ () => {
                         Keyboard.dismiss();
                         (this.state.input !== '') ? (
@@ -40,7 +44,7 @@ class InputBar extends React.Component {
                     <Icon
                         name='plus'
                         type='feather'
-                        color='#6B3C2A'
+                        color={theme.button_icons}
                     />
                 </TouchableOpacity>
             </View>
@@ -48,7 +52,7 @@ class InputBar extends React.Component {
     }
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -57,7 +61,8 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        backgroundColor: '#ededed',
+        color: theme.primary_text,
+        backgroundColor: theme.text_box,
         flex: 1,
         fontSize: 13,
         height: 40,
@@ -71,7 +76,7 @@ const styles = StyleSheet.create({
         margin: 2,
         borderRadius: 50,
         flexDirection: 'row',
-        backgroundColor: '#F68B5F',
+        backgroundColor: theme.accent_secondary,
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 8
@@ -97,4 +102,4 @@ const mapStateToProps = (state) => {
     cat_id: state.categories.curr_cat_id
 })};
 
-export default connect(mapStateToProps)(InputBar);
+export default connect(mapStateToProps)(withTheme(InputBar));

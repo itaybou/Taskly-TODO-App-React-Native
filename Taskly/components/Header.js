@@ -36,7 +36,6 @@ export const HeaderDrawer = (props) => {
 }
 
 export const HeaderDetails = (props) => {
-    console.log(props.navigation.state.routeName);
     const subScreen = additionalScreens.includes(props.navigation.state.routeName);
     return (
         <TouchableWithoutFeedback onPress={() => 

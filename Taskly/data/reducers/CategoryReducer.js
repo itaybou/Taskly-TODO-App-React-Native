@@ -1,7 +1,14 @@
 import { UserActionTypes, defaultCategoryDetails } from '../Constants'
 
-const CategoryReducer = (state = {curr_cat_id: defaultCategoryDetails.id, 
-        catList:[{id: defaultCategoryDetails.id, title:defaultCategoryDetails.name, color: defaultCategoryDetails.color}], cat_id: defaultCategoryDetails.id + 1}, action) => {
+const initial_state = {
+    curr_cat_id: defaultCategoryDetails.id, 
+    catList:[{id: defaultCategoryDetails.id, title:defaultCategoryDetails.name, color: defaultCategoryDetails.color}],
+    cat_id: defaultCategoryDetails.id + 1
+}
+
+export const categories_exclude_persist = ['curr_cat_id'];
+
+const CategoryReducer = (state = initial_state, action) => {
     switch(action.type) {
         case UserActionTypes.ADD_CAT:
             return {
