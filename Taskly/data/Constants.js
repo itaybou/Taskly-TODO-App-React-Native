@@ -1,4 +1,4 @@
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
 
 export const FilterTabs = {
     ALL: 'All',
@@ -41,6 +41,9 @@ export const defaultCategoryDetails = {
     name: 'All Tasks',
     color: 'transparent'
 }
+
+export const isIOS = Platform.OS === 'ios';
+export const isANDROID = Platform.OS === 'android';
 
 export const snackBarTimeout = 3500; // Timeout in milliseconds
 export const maxTaskImportance = 10; // Max importance (range is 0 to maxTaskImportance)

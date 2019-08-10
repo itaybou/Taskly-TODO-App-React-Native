@@ -1,9 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { StyleSheet, View, Text, Switch } from 'react-native';
-import { CheckBox, Icon } from 'react-native-elements'
+import { CheckBox, Icon, Card, Button } from 'react-native-elements'
 import { toggleCompleted, setTaskImportance, setTaskDueDate, setTaskNotification  } from '../data/actions/Actions'
-import {parseDateFromDDMMYYYYHHmm} from '../data/actions/Notifications'
 import DatePicker from 'react-native-datepicker'
 import { AutoGrowingTextInput } from 'react-native-autogrow-textinput';
 import Slider from "react-native-slider";
@@ -20,38 +19,38 @@ class EditTaskScreen extends React.Component {
             importance: this.props.item.importance,
             description: this.props.item.description,
             due_date: this.props.item.due_date,
-            notification: this.props.item.notification_id === null ? false : true
+            notification: this.props.item.notification_id === null ? false : true,
+            notify_time: 0
         }
-        console.log(this.props.item);
     }
 
-    async toggleNotification() {
-        console.log(this.state);
-        console.log(this.props.item);
-        try {
+    toggleNotification() {
+        this.setState({notification: !this.state.notification}, async () => {
             if(this.state.notification) {
                 if(this.props.item.due_date !== '') {
-                    const notification_id = await sendScheduledNotification("Your task is due!", this.props.item.title, this.props.item, this.props.item.due_date);
+                    const notification_id = await sendScheduledNotification(
+                        "Your task is due!",
+                        this.props.item.title,
+                        this.props.item,
+                        this.props.item.due_date,
+                        this.state.notify_time
+                    );
                     if(notification_id !== 'illegal' && notification_id !== 'none') {
-                        this.setState({notification: true}, () => {
-                            this.props.setTaskNotification(this.props.item, notification_id);
-                            console.log(notification_id)
-                        });
+                        this.props.setTaskNotification(this.props.item, notification_id);
                     } else {
                         this.setState({notification: false});
-                        alert('blah2')
+                        alert('too early!')
                     }
                 } else {
                     this.setState({notification: false});
-                    alert('blahh');
+                    alert ('No due date entered')
                 }
             } else {
                 await cancelScheduledNotification(this.props.item.notification_id);
                 this.props.setTaskNotification(this.props.item, null);
             }
-        } catch(err) {
-            console.log('error: ', err)
-        }
+        });
+        console.log(this.props.item);
     }
 
     render() {
@@ -59,25 +58,45 @@ class EditTaskScreen extends React.Component {
         const style = styles(theme);
         return (
             <View style={style.container}>
-                <View style={style.titleContainer}>
-                    <Text style={{color: theme.primary_text, fontSize: 16, fontWeight: '900'}}>Additional task details</Text>
-                </View>
-                <View style={{margin: 15, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
+                <Card
+                    title='ADDITIONAL TASK DETAILS'
+                >
                     <View style={{width: '100%', marginBottom: 25}}>
                         <CheckBox
-                            size={35}
-                            iconType={'feather'}
-                            checkedIcon={'check-circle'}
-                            uncheckedIcon={'circle'}
-                            containerStyle={style.checkBox}
-                            checked={this.props.item.completed}
-                            checkedColor= {theme.accent_primary}
-                            title={this.props.item.title}
-                            onIconPress={ () => this.props.toggleTask(this.props.item)}
-                            textStyle={this.props.item.completed ? style.textCompleted : style.textNotCompleted}
-                        
-                        />
-                    </View>
+                                size={35}
+                                iconType={'feather'}
+                                checkedIcon={'check-circle'}
+                                uncheckedIcon={'circle'}
+                                containerStyle={style.checkBox}
+                                checked={this.props.item.completed}
+                                checkedColor= {theme.accent_primary}
+                                title={this.props.item.title}
+                                onIconPress={ () => this.props.toggleTask(this.props.item)}
+                                textStyle={this.props.item.completed ? style.textCompleted : style.textNotCompleted}
+                            
+                            />
+                        </View>
+                </Card>
+                <Card
+                    title='TASK CATEGORY'
+                >
+                    <View style={{width: '100%', marginBottom: 25}}>
+                        <CheckBox
+                                size={35}
+                                iconType={'feather'}
+                                checkedIcon={'check-circle'}
+                                uncheckedIcon={'circle'}
+                                containerStyle={style.checkBox}
+                                checked={this.props.item.completed}
+                                checkedColor= {theme.accent_primary}
+                                title={this.props.item.title}
+                                onIconPress={ () => this.props.toggleTask(this.props.item)}
+                                textStyle={this.props.item.completed ? style.textCompleted : style.textNotCompleted}
+                            
+                            />
+                        </View>
+                </Card>
+                <View style={{margin: 15, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
                     <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
                         <Dropdown
                             containerStyle={{width: '60%'}}
@@ -136,7 +155,6 @@ class EditTaskScreen extends React.Component {
                                 onDateChange={(date) => {
                                     this.setState({due_date: date});
                                     this.props.setDueDate(this.props.item, date);
-                                    console.log(parseDateFromDDMMYYYYHHmm(date));   
                                 }}
                                 style={{width: 200}}
                                 date={this.state.due_date}

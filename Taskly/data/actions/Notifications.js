@@ -1,6 +1,8 @@
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
-import { Notifications } from 'expo';
+import { Notifications, Platform } from 'expo';
+import { handleNotification } from '../../App'
+import { isANDROID } from '../../data/Constants'
 
 export const askPermissions = async () => {
     const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
@@ -12,13 +14,17 @@ export const askPermissions = async () => {
     if (finalStatus !== 'granted') {
         return false;
     }
+    if (isANDROID) {
+        Notifications.createChannelAndroidAsync('due-tasks', {
+            name: 'Tasks',
+            priority: 'max',
+            sound: true,
+            vibrate: true
+        });
+    }
     Notifications.addListener(handleNotification);
     return true;
 };
-
-handleNotification = ({origin, data}) => {
-    console.info(`Notification (${origin}) with data: ${JSON.stringify(data)}`)
-}
 
 export const parseDateFromDDMMYYYYHHmm = (datetimeString) => {
     const datetime = datetimeString + ':00'
@@ -30,26 +36,40 @@ export const parseDateFromDDMMYYYYHHmm = (datetimeString) => {
 };
 
 
-export const sendScheduledNotification = (title, body, data, datetimeString) => {
+export const sendScheduledNotification = async (title, body, data, datetimeString, millisecond_offset) => {
     let notification_id = 'none';
-    const parsed_date = parseDateFromDDMMYYYYHHmm(datetimeString).getTime();
-    if(parsed_date > Date.now()) {
+    const parsed_date = parseDateFromDDMMYYYYHHmm(datetimeString).getTime() - millisecond_offset;
+    if(parsed_date > 0) {
         const localNotification = {
             title: title,
             body: body,
-            data: data
+            data: data,
+            channelId: 'due-tasks',
+            ios: {
+                sound: true,
+            },
+            android: {
+                channelId: 'due-tasks',
+                color: 'yellow'
+            },
         }
         const schedulingOptions = {
             time: parsed_date
         }
         console.log('Scheduling delayed notification:', { localNotification, schedulingOptions })
-        Notifications.scheduleLocalNotificationAsync(localNotification, schedulingOptions)
-            .then(id => notification_id = id)
+        await Notifications.scheduleLocalNotificationAsync(localNotification, schedulingOptions)
+            .then(id => {
+                notification_id = id;
+            })
             .catch(err => console.error(err))
+        console.log(notification_id);
         return notification_id; // If equal to 'none' we have an error.
-    } else return 'illegal';
+    } else {
+        return 'illegal';
+    }
 }
 
 export const cancelScheduledNotification = (notification_id) => {
     Notifications.dismissNotificationAsync(notification_id);
+    console.log(notification_id);
 }
