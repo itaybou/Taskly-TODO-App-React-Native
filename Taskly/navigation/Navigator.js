@@ -9,6 +9,11 @@ import { Icon } from 'react-native-elements'
 import { FilterTabs, windowWidth } from '../data/Constants'
 import EditTaskScreen from '../screens/EditTaskScreen';
 
+let popup = null;
+
+export const setPopup = (reference) =>
+    popup = reference;
+
 const getIcons = (navigation) => {
     const { routeName } = navigation.state;
     switch (routeName) {

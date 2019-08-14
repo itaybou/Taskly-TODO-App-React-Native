@@ -26,10 +26,12 @@ class InputBar extends React.Component {
             <View style={style.inputContainer}>
                 <TextInput style={style.input}
                     value={this.state.input}
+                    selectTextOnFocus={ true }
+                    removeClippedSubviews={ false }
                     placeholder="Enter A new task"
                     placeholderTextColor={theme.placeholder_text}
                     underlineColorAndroid='transparent'
-                    selectionColor={theme.accent_primary}
+                    selectionColor={theme.accent_secondary}
                     onChangeText={ (input) => this.setState({input}) }/>
                 <TouchableOpacity 
                     style={style.button} 

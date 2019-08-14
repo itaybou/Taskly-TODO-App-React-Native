@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, InteractionManager, TouchableOpacity, KeyboardAvoidingView, Dimensions, Keyboard} from 'react-native';
+import { StyleSheet, View, Text, InteractionManager, TouchableOpacity, Dimensions} from 'react-native';
 import { Icon, Header } from 'react-native-elements';
 import { connect } from 'react-redux'
 import CategoryItem from './CategoryItem'
@@ -63,7 +63,7 @@ class CategoryDrawer extends React.Component {
                 <View></View>
                 </Header>
                 <DraggableFlatList 
-                    style={{flex: 1}}
+                    style={{flex: 1, marginTop: 10}}
                     data={ this.props.catList }
                     extraData = {this.props.catList}
                     keyExtractor={this.keyExtractor}

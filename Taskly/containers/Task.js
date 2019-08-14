@@ -1,15 +1,14 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Animated, Text } from 'react-native';
-import { CheckBox, Icon } from 'react-native-elements'
+import { StyleSheet, View, TouchableHighlight, Animated, Text, TouchableOpacity, Share } from 'react-native';
+import { CheckBox, Icon } from 'react-native-elements';
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import { connect } from 'react-redux';
 import Slider from "react-native-slider";
-import { SCREENS, maxTaskImportance } from '../data/Constants'
+import { SCREENS, maxTaskImportance, defaultCategoryDetails } from '../data/Constants'
 import { withTheme } from '../data/Theme'
 
-
-export const minimumTaskHeight = 45;
+export const minimumTaskHeight = 58;
 
 class Task extends React.PureComponent {
     constructor(props) {
@@ -18,7 +17,8 @@ class Task extends React.PureComponent {
             menu: null,
             expanded: false,
             animation: new Animated.Value(minimumTaskHeight),
-            toggleClose: this.toggleExpand.bind(this)
+            toggleClose: this.toggleExpand.bind(this),
+            fadeValue: new Animated.Value(1)
         }
     }
 
@@ -33,6 +33,26 @@ class Task extends React.PureComponent {
     showMenu = () => {
         this.state.menu.show();
     };
+
+    toggleShare() {
+        const item = this.props.item;
+        const shareMessage =
+            `Task: ${item.completed? '✅' : '⬜️'} ${item.title}\nStatus: ${item.completed ? 'Completed' : 'Active'}` +
+            (item.importance !== 0 ? `, Importance: ${item.importance}/${maxTaskImportance}\n` : `\n`) +
+            (this.props.category.id !== defaultCategoryDetails.id ? `Category: ${this.props.category.title}\n` : ``) +
+            (item.description !== ''? `Description: ${item.description}\n` : ``) +
+            `Created: ${item.created_date}\n` + (item.completed ? `Completed: ${item.completed_date}\n` : '') +
+            (item.due_date !== '' ? `Due date: ${item.due_date}\n` : ``) +
+            `Sent via Taskly`;
+        this.hideMenu();
+        Share.share({
+            title: `Taskly task share: ${item.title}`,
+            message: shareMessage
+        },
+        {
+            dialogTitle: 'Share task details via: ',
+        })
+    }
 
     toggleExpand() {
         let initialValue = this.state.expanded? this.state.maxHeight + this.state.minHeight : this.state.minHeight,
@@ -49,6 +69,13 @@ class Task extends React.PureComponent {
         ).start();  //Step 5
     }
 
+    _start = () => {
+        return Animated.timing(this.state.fadeValue, {
+        toValue: 1, // output 
+        duration: 3000, // duration of the animation 
+        }).start();
+        };
+
     setMaxHeight(event){
         this.setState({
             maxHeight: event.nativeEvent.layout.height
@@ -62,6 +89,15 @@ class Task extends React.PureComponent {
     }
 
     complete() {
+        Animated.timing(this.state.fadeValue, {
+            toValue: 0.2,
+            duration: 350,
+        }).start(() => {
+            Animated.timing(this.state.fadeValue, {
+                toValue: 1,
+                duration: 350,
+            }).start();
+        });
         this.props.toggleCompleted();
     }
 
@@ -82,32 +118,43 @@ class Task extends React.PureComponent {
         return (
             <Animated.View style={[style.container, {height: this.state.animation}]}>
                 <View style={[style.taskContainer, {backgroundColor: this.state.expanded ? theme.background_selected : theme.background}]} onLayout={this.setMinHeight.bind(this)}>
+                        <View style={{width: '1.5%', height:'100%', backgroundColor: this.props.category.color}} />
                         <View style={style.checkBoxContainer}>
-                            <View style={{width: '1.5%', height:'100%', backgroundColor: this.props.category.color}} />
-                            <CheckBox
-                                size={28}
-                                iconType={'feather'}
-                                checkedIcon={'check-circle'}
-                                uncheckedIcon={'circle'}
-                                containerStyle={style.checkBox}
-                                checked={item.completed}
-                                titleProps={ {
-                                    numberOfLines: 2
+                            <Animated.View
+                                style={{
+                                    width: '70%',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-start',
+                                    backgroundColor: 'transparent',
+                                    borderColor: 'transparent',
+                                opacity: this.state.fadeValue,
                                 }}
-                                checkedColor= {theme.accent_primary}
-                                uncheckedColor = {theme.icons_secondary}
-                                title={item.title}
-                                onPress={this.toggleExpand.bind(this)}
-                                onLongPress={this.editTask.bind(this)}
-                                onIconPress={this.complete.bind(this)}
-                                textStyle={item.completed ? style.textCompleted : style.textNotCompleted}
-                            />
-                            <View style={{flex:1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end'}}>
-                                <TouchableHighlight 
-                                    style={style.button} 
-                                    onPress={this.showMenu}
-                                    underlayColor={theme.background}
-                                >
+                            >
+                                <CheckBox
+                                    size={28}
+                                    iconType={'feather'}
+                                    checkedIcon={'check-circle'}
+                                    uncheckedIcon={'circle'}
+                                    containerStyle={style.checkBox}
+                                    checked={item.completed}
+                                    titleProps={ {
+                                        numberOfLines: 2
+                                    }}
+                                    checkedColor= {theme.accent_primary}
+                                    uncheckedColor = {theme.icons_secondary}
+                                    title={item.title}
+                                    onPress={this.toggleExpand.bind(this)}
+                                    onLongPress={this.editTask.bind(this)}
+                                    onIconPress={this.complete.bind(this)}
+                                    textStyle={item.completed ? style.textCompleted : style.textNotCompleted}
+                                />
+                            </Animated.View>
+                            <TouchableOpacity
+                                style={{flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end'}}
+                                onPress={this.showMenu}
+                            >
+                                <View style={{flex:1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end'}}>
                                     <View style={style.taskIconsContainer}>
                                         <Menu
                                             ref={this.setMenuRef}
@@ -124,37 +171,52 @@ class Task extends React.PureComponent {
                                         >
                                             <MenuItem textStyle={{color: theme.primary_text}} onPress={this.editTask.bind(this)}>Edit</MenuItem>
                                             <MenuDivider color={theme.activeTintColor}/>
+                                            <MenuItem textStyle={{color: theme.primary_text}} onPress={this.toggleShare.bind(this)}>Share</MenuItem>
+                                            <MenuDivider color={theme.activeTintColor}/>
                                             <MenuItem textStyle={{color: theme.primary_text}} onPress={this.remove.bind(this)}>Remove</MenuItem>
                                         </Menu>
                                     </View>
-                                </TouchableHighlight>
-                                <View style={{flex: 0.5, flexDirection: 'row', justifyContent:'flex-end', alignItems: 'flex-end', marginEnd: 10, marginTop: 10}}>
-                                    {this.state.expanded ? <View></View> :
-                                        item.importance !== 0 ?
-                                        <Slider
-                                            style={{width: '62%', height: '50%', marginBottom: 1}}
-                                            trackStyle={style.importanceSliderTrack}
-                                            thumbStyle={style.importanceSliderThumb}
-                                            thumbTintColor={theme.main_secondary}
-                                            minimumValue={0}
-                                            disabled={true}
-                                            maximumValue={maxTaskImportance}
-                                            minimumTrackTintColor={theme.accent_primary}
-                                            maximumTrackTintColor={theme.separator}
-                                            step={1}
-                                            value={item.importance}
-                                        /> : <View></View>
+                                    <View style={{flex: 0.5, flexDirection: 'row', justifyContent:'flex-end', alignItems: 'flex-end', marginEnd: 10, marginTop: 10}}>
+                                        {this.state.expanded ? <View></View> :
+                                            item.importance !== 0 ?
+                                            <Slider
+                                                style={{width: '50%', height: '50%', marginBottom: 1}}
+                                                trackStyle={style.importanceSliderTrack}
+                                                thumbStyle={style.importanceSliderThumb}
+                                                thumbTintColor={theme.main_secondary}
+                                                minimumValue={0}
+                                                disabled={true}
+                                                maximumValue={maxTaskImportance}
+                                                minimumTrackTintColor={theme.accent_primary}
+                                                maximumTrackTintColor={theme.separator}
+                                                step={1}
+                                                value={item.importance}
+                                            /> : <View></View>
+                                        }
+                                    </View>
+                                    {
+                                        this.props.item.due_date !== '' ?
+                                        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems:'flex-start', marginTop: 8}}>
+                                            <Text style={{color: theme.secondary_text, fontSize: 10}}>{this.props.item.due_date}</Text>
+                                            <Icon
+                                                containerStyle={{marginRight: 10, marginTop: 6, marginLeft: 5}}
+                                                size={10}
+                                                name={'clock'}
+                                                type='feather'
+                                                color={theme.icons_secondary}
+                                            />
+                                        </View>: <View></View>
                                     }
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <View style={style.body} onLayout={this.setMaxHeight.bind(this)}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'flex-end'}}>
-                            <Text style={{fontSize: 12, fontWeight: 'bold'}}>Task description:</Text>
+                            <Text style={{color: theme.primary_text, fontSize: 12, fontWeight: 'bold'}}>Task description:</Text>
                             <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
-                                <Text style={{fontSize: 12, fontWeight: 'bold'}}>Category: </Text>
-                                <Text style={{fontSize: 12}}>{this.props.category.title}</Text>
+                                <Text style={{color: theme.primary_text, fontSize: 12, fontWeight: 'bold'}}>Category: </Text>
+                                <Text style={{color: theme.primary_text, fontSize: 12}}>{this.props.category.title}</Text>
                                 <Icon
                                     containerStyle={{marginLeft: 3}}
                                     size={13}
@@ -175,19 +237,19 @@ class Task extends React.PureComponent {
                         />
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'flex-end'}}>
                             <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
-                                <Text style={{fontSize: 12}}>Created: {item.created_date}</Text>
+                                <Text style={{color: theme.primary_text, fontSize: 12}}>Created: {item.created_date}</Text>
                             </View>
                             {item.completed ? 
                                 <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
-                                    <Text style={{fontSize: 12}}>Completed: {item.completed_date}</Text>
+                                    <Text style={{color: theme.primary_text, fontSize: 12}}>Completed: {item.completed_date}</Text>
                                 </View> : <View></View>
                             }
                         </View>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'flex-end'}}>
-                            <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
-                                <Text style={{fontSize: 12}}>Importance: </Text>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'center'}}>
+                            <View style={{width: '50%', flexDirection:'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                                <Text style={{color: theme.primary_text, fontSize: 12, marginEnd: 5}}>Importance: </Text>
                                 <Slider
-                                    style={{width: '40%', height: '50%'}}
+                                    style={{width: '50%'}}
                                     trackStyle={style.importanceSliderTrack}
                                     thumbStyle={style.importanceSliderThumb}
                                     minimumValue={0}
@@ -200,7 +262,7 @@ class Task extends React.PureComponent {
                                 />
                             </View>
                             {item.due_date !== '' ? (
-                                <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
+                                <View style={{width: '50%', flexDirection:'row', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
                                         <Icon
                                             containerStyle={{marginRight: 4}}
                                             size={13}
@@ -208,8 +270,8 @@ class Task extends React.PureComponent {
                                             type='feather'
                                             color={theme.icons}
                                         />
-                                        <Text style={{fontSize: 12, fontWeight: '500', textDecorationLine: 'underline'}}>Due</Text>
-                                        <Text style={{fontSize: 12, fontWeight: '400'}}>: {item.due_date}</Text>
+                                        <Text style={{color: theme.primary_text, fontSize: 12, fontWeight: '500', textDecorationLine: 'underline'}}>Due</Text>
+                                        <Text style={{color: theme.primary_text, fontSize: 12, fontWeight: '400'}}>: {item.due_date}</Text>
                                 </View>)  : <View></View>
                             }
                         </View>
@@ -222,6 +284,9 @@ class Task extends React.PureComponent {
 const styles = (theme) => StyleSheet.create({
     container: {
         backgroundColor: theme.background,
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
         overflow: 'hidden'
     },
 
@@ -257,7 +322,7 @@ const styles = (theme) => StyleSheet.create({
     },
 
     checkBox: {
-        width: '70%',
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
@@ -266,7 +331,9 @@ const styles = (theme) => StyleSheet.create({
     },
 
     taskIcons: {
-        marginEnd: 10
+        marginEnd: 10,
+        marginStart: 20,
+        marginBottom: 5
     },
 
     additionalInfo: {
@@ -289,9 +356,11 @@ const styles = (theme) => StyleSheet.create({
 
     body: {
         height: 'auto',
+        width: '100%',
         backgroundColor: theme.background,
         marginStart: 0,
-        padding: 10,
+        paddingStart: 10,
+        paddingEnd: 10,
         paddingTop: 5,
         borderBottomColor: theme.separator,
         borderBottomWidth: 4

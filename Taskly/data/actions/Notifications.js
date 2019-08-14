@@ -1,8 +1,12 @@
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import { Notifications, Platform } from 'expo';
-import { handleNotification } from '../../App'
 import { isANDROID } from '../../data/Constants'
+
+let popup = null;
+
+export const setPopup = (reference) =>
+    popup = reference;
 
 export const askPermissions = async () => {
     const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
@@ -25,6 +29,22 @@ export const askPermissions = async () => {
     Notifications.addListener(handleNotification);
     return true;
 };
+
+
+const handleNotification = ({origin, data}) => {
+    if(origin === 'selected') {
+        popup.show({
+            onPress: function() {console.log('Pressed')},
+            appIconSource: require('../../assets/icon.png'),
+            appTitle: 'Taskly',
+            timeText: 'Now',
+            title: 'Your task is due!',
+            body: data.title,
+            slideOutTime: 3000
+        });
+        console.info(`Notification (${origin}) with data: ${JSON.stringify(data)}`);
+    }
+}
 
 export const parseDateFromDDMMYYYYHHmm = (datetimeString) => {
     const datetime = datetimeString + ':00'

@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Taskly",
+    "description": "Task management app",
     "slug": "Taskly",
     "privacy": "public",
     "sdkVersion": "33.0.0",
@@ -24,7 +25,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.android.taskly"
+    },
+    "android": {
+      "package": "com.android.taskly"
     }
   }
 }

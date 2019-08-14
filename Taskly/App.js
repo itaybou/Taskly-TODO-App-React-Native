@@ -7,10 +7,8 @@ import { data, persistor } from './data/Data';
 import { isIOS } from './data/Constants'
 import { ThemeProvider, THEMES } from './data/Theme';
 import { AppLoading } from 'expo';
-import { askPermissions } from './data/actions/Notifications'
+import { askPermissions, setPopup } from './data/actions/Notifications'
 import NotificationPopup from 'react-native-push-notification-popup';
-
-let popup = null;
 
 export default class App extends React.Component {
     state = {
@@ -25,7 +23,6 @@ export default class App extends React.Component {
   toggleTheme() {
     this.setState({theme: data.getState().theme});
   }
-  
 
   render() {
     const status_bar = isIOS ? <View style={styles.status_bar}></View> : <View></View>;
@@ -42,7 +39,7 @@ export default class App extends React.Component {
           >
             <ThemeProvider theme={THEMES[this.state.theme]}>
               {status_bar}
-              <NotificationPopup ref={ref => popup = ref} />
+              <NotificationPopup ref={ref => setPopup(ref)} />
               <Navigator screenProps={{toggleTheme: this.toggleTheme.bind(this)}}/>
             </ThemeProvider>
           </PersistGate>
@@ -52,23 +49,9 @@ export default class App extends React.Component {
   }
 }
 
-export const handleNotification = ({origin, data}) => {
-  popup.show({
-    onPress: function() {console.log('Pressed')},
-    appIconSource: require('./assets/icon.png'),
-    appTitle: 'Taskly',
-    timeText: 'Now',
-    title: 'Your task is due!',
-    body: data.title,
-    slideOutTime: 3000
-  });
-  console.info(`Notification (${origin}) with data: ${JSON.stringify(data)}`);
-}
-
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
-      backgroundColor: '#FFFFFF'
+      flex: 1
   }
 });
 

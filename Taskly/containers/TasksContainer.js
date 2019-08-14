@@ -9,11 +9,11 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import { Icon } from 'react-native-elements'
 import SnackBar from 'react-native-snackbar-component'
 
-
 class TaskList extends React.Component {
     constructor(props) {
         super(props);
         this.state= {
+            shareVisible: false,
             snackBar: {
                 snackBarVisible: false,
                 snackBarPressed: false,
@@ -84,7 +84,7 @@ class TaskList extends React.Component {
                 task: item,
                 index: index
             }});
-            this.props.removeTask(item);
+            this.props.removeTask(item, index);
             this.showSnackBar('task');
         }}])
     }
@@ -179,6 +179,7 @@ class TaskList extends React.Component {
                     closeOnRowOpen={true}
                     closeOnScroll={true}
                 />
+                
                 <SnackBar 
                     visible={this.state.snackBar.snackBarVisible} 
                     textMessage={this.state.snackBar.undoMode === 'completed' ? 'Completed tasks have been cleared!' : 'Task has been deleted!'}
