@@ -26,7 +26,8 @@ const CategoryReducer = (state = initial_state, action) => {
             }
 
         case UserActionTypes.REMOVE_CAT: 
-            return { catList: state.catList.filter( cat => cat.id !== action.category.id),
+            return { curr_cat_id: defaultCategoryDetails.id,
+                    catList: state.catList.filter( cat => cat.id !== action.category.id),
                     cat_id: state.cat_id }
         
         case UserActionTypes.SWITCH_CAT:
@@ -40,6 +41,11 @@ const CategoryReducer = (state = initial_state, action) => {
         case UserActionTypes.ARRANGE_CAT:
             return { curr_cat_id: state.curr_cat_id,
                     catList: action.catList,
+                    cat_id: state.cat_id}
+
+        case UserActionTypes.RENAME_CAT:
+            return {curr_cat_id: state.curr_cat_id,
+                    catList: state.catList.map(cat => cat.id === action.category.id ? { ...cat, title: action.name} : cat),
                     cat_id: state.cat_id}
                     
         default:

@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Animated, Text, TouchableOpacity, Share } from 'react-native';
+import { StyleSheet, View, Animated, Text, TouchableOpacity, Share } from 'react-native';
 import { CheckBox, Icon } from 'react-native-elements';
-import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import { connect } from 'react-redux';
 import Slider from "react-native-slider";
@@ -18,7 +17,8 @@ class Task extends React.PureComponent {
             expanded: false,
             animation: new Animated.Value(minimumTaskHeight),
             toggleClose: this.toggleExpand.bind(this),
-            fadeValue: new Animated.Value(1)
+            checkBoxFadeValue: new Animated.Value(1),
+            isMoveVisible: false
         }
     }
 
@@ -32,6 +32,10 @@ class Task extends React.PureComponent {
     
     showMenu = () => {
         this.state.menu.show();
+    };
+
+    toggleRemove = () => {
+        this.setState({ isMoveVisible: !this.state.isMoveVisible }, () => this.hideMenu());
     };
 
     toggleShare() {
@@ -69,19 +73,12 @@ class Task extends React.PureComponent {
         ).start();  //Step 5
     }
 
-    _start = () => {
-        return Animated.timing(this.state.fadeValue, {
-        toValue: 1, // output 
-        duration: 3000, // duration of the animation 
-        }).start();
-        };
-
     setMaxHeight(event){
         this.setState({
             maxHeight: event.nativeEvent.layout.height
         });
     }
-    
+
     setMinHeight(event){
         this.setState({
             minHeight: event.nativeEvent.layout.height
@@ -89,11 +86,11 @@ class Task extends React.PureComponent {
     }
 
     complete() {
-        Animated.timing(this.state.fadeValue, {
+        Animated.timing(this.state.checkBoxFadeValue, {
             toValue: 0.2,
             duration: 350,
         }).start(() => {
-            Animated.timing(this.state.fadeValue, {
+            Animated.timing(this.state.checkBoxFadeValue, {
                 toValue: 1,
                 duration: 350,
             }).start();
@@ -103,7 +100,11 @@ class Task extends React.PureComponent {
 
     editTask() {
         this.hideMenu();
-        this.props.navigation.navigate(SCREENS.EDIT_TASK, {itemID: this.props.item.id})
+        this.props.navigation.navigate(SCREENS.EDIT_TASK, {
+            itemID: this.props.item.id,
+            share: this.toggleShare.bind(this),
+            remove: this.remove.bind(this)
+        });
     }
 
     remove() {
@@ -128,7 +129,7 @@ class Task extends React.PureComponent {
                                     justifyContent: 'flex-start',
                                     backgroundColor: 'transparent',
                                     borderColor: 'transparent',
-                                opacity: this.state.fadeValue,
+                                opacity: this.state.checkBoxFadeValue,
                                 }}
                             >
                                 <CheckBox
@@ -156,6 +157,15 @@ class Task extends React.PureComponent {
                             >
                                 <View style={{flex:1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end'}}>
                                     <View style={style.taskIconsContainer}>
+                                        {item.notification.notification_id !== null ?
+                                            <Icon
+                                                containerStyle={{ marginEnd: 4, marginStart: 4, marginBottom: 5}}
+                                                size={12}
+                                                name={'notifications'}
+                                                type='ionicons'
+                                                color={theme.main_secondary}
+                                            /> : <View></View>
+                                        }
                                         <Menu
                                             ref={this.setMenuRef}
                                             style={{backgroundColor: theme.background_selected, }}
@@ -194,7 +204,7 @@ class Task extends React.PureComponent {
                                             /> : <View></View>
                                         }
                                     </View>
-                                    {
+                                    {   this.state.expanded ? <View></View> :
                                         this.props.item.due_date !== '' ?
                                         <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems:'flex-start', marginTop: 8}}>
                                             <Text style={{color: theme.secondary_text, fontSize: 10}}>{this.props.item.due_date}</Text>
@@ -226,15 +236,11 @@ class Task extends React.PureComponent {
                                 />
                             </View>
                         </View>
-                        <AutoGrowingTextInput 
-                            style={style.descriptionInput}
-                            maxHeight={200}
-                            minHeight={45}
-                            Value={item.description}
-                            placeholder={'Insert task description'} 
-                            placeholderTextColor="#c7c7c7"
-                            underlineColorAndroid='transparent'
-                        />
+                        <View style={style.descriptionInput}>
+                            <Text style={{color: theme.primary_text, fontSize: 12, textAlign: 'center', lineHeight: 12}}>
+                                {item.description !== '' ? item.description : 'None'}
+                            </Text>
+                        </View>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'flex-end'}}>
                             <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
                                 <Text style={{color: theme.primary_text, fontSize: 12}}>Created: {item.created_date}</Text>
@@ -242,7 +248,19 @@ class Task extends React.PureComponent {
                             {item.completed ? 
                                 <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
                                     <Text style={{color: theme.primary_text, fontSize: 12}}>Completed: {item.completed_date}</Text>
-                                </View> : <View></View>
+                                </View> : 
+                                <View style={{flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end'}}>
+                                    <TouchableOpacity 
+                                        style={style.completeButton} 
+                                        onPress={this.complete.bind(this)}>
+                                        <Icon
+                                            size={18}
+                                            name='check'
+                                            type='feather'
+                                            color={'black'}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
                             }
                         </View>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'center'}}>
@@ -332,7 +350,7 @@ const styles = (theme) => StyleSheet.create({
 
     taskIcons: {
         marginEnd: 10,
-        marginStart: 20,
+        marginStart: 0,
         marginBottom: 5
     },
 
@@ -368,10 +386,9 @@ const styles = (theme) => StyleSheet.create({
 
     descriptionInput: {
         backgroundColor: theme.text_box,
-        height:12,
         fontSize: 12,
         margin: 2,
-        textAlign: 'center',
+        padding: 10,
         borderRadius: 10
     },
 
@@ -397,15 +414,25 @@ const styles = (theme) => StyleSheet.create({
         height: 10,
         borderRadius: 5,
         backgroundColor: theme.accent_third
-    }
+    },
+
+    completeButton: {
+        width: 60,
+        height: '100%',
+        margin: 2,
+        borderRadius: 50,
+        flexDirection: 'row',
+        backgroundColor: theme.main_secondary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2
+    },
 });
 
-const mapStateToPropsFactory = (state, ownProps) => {
-    return function mapStateToProps(state) {
-        return {
-            category: state.categories.catList.find(cat => cat.id === ownProps.item.category_id)
-        }
+const mapStateToProps = (state, ownProps) => {
+    return {
+        category: state.categories.catList.find(cat => cat.id === ownProps.item.category_id)
     }
 };
 
-export default connect(mapStateToPropsFactory)(withTheme(Task));
+export default connect(mapStateToProps)(withTheme(Task));

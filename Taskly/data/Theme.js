@@ -24,10 +24,12 @@ export const THEMES = {
         secondary_text: '#858584',
         placeholder_text: "#C7C7C7",
         activeTintColor: "#EEEEEE",
+        sort_bar: "#EEEEEE",
         inactiveTintColor: "#222222",
         tintHighlight: '#FF7E65',
         text_box: '#EDEDED',
-        snackbar_background: '#DCDCDC'
+        snackbar_background: '#DCDCDC',
+        complete_button: '#9CCC65'
     },
 
     dark: {
@@ -48,10 +50,12 @@ export const THEMES = {
         secondary_text: '#D3D3D3',
         placeholder_text: "#C7C7C7",
         activeTintColor: "#000000",
+        sort_bar: "#171717",
         inactiveTintColor: "#EEEEEE",
         tintHighlight: '#CC5431',
         text_box: '#424242',
-        snackbar_background: '#484848'
+        snackbar_background: '#484848',
+        complete_button: '#689F38'
     },
 };
 

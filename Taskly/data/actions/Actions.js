@@ -18,13 +18,16 @@ export const addTask = (title, task_id, cat_id) => {
     return ({
         type: UserActionTypes.ADD,
         id: task_id,
-        created_date: getCurrentDateFormatted(),
+        created_date: getCurrentDateFormatted(true),
         due_date: '',
         completed_date: '',
         description: '',
         importance: 0,
         category_id: cat_id,
-        notification_id: null,
+        notification: {
+            notification_id: null,
+            notify_ahead: 0
+        },
         title
 })};
 
@@ -47,10 +50,11 @@ export const toggleCompleted = (task) => {
     task
 })};
 
-export const setTaskNotification = (task, notification_id) => {
+export const setTaskNotification = (task, notification_id, notify_ahead) => {
     return ({
         type: UserActionTypes.SET_NOTIFICATION,
         notification_id,
+        notify_ahead,
         task
 })};
 
@@ -80,9 +84,10 @@ export const changeVisibility = (screen) => {
     screen: screen.routeName
 })};
 
-export const clearCompleted = () => {
+export const clearCompleted = (current_category_id) => {
     return ({
-    type: UserActionTypes.CLEAR
+    type: UserActionTypes.CLEAR,
+    current_category_id
 })};
 
 export const undoClearCompleted = (completed) => {
@@ -101,16 +106,55 @@ export const addCategory = (title, cat_id, color) => {
 
 export const removeCategory = (category) => {
     return ({
-        type: UserActionTypes.ADD_CAT,
-        id: cat_id,
-        title,
-        color: defaultCategoryColor
+        type: UserActionTypes.REMOVE_CAT,
+        category,
+})};
+
+export const removeAllCategory = (category) => {
+    return ({
+        type: UserActionTypes.REMOVE_ALL,
+        category,
+})}
+
+export const moveTasks = (category, next_category) => {
+    return ({
+        type: UserActionTypes.MOVE_TASKS,
+        category,
+        next_category
+})};
+
+export const renameCategory = (name, category) => {
+    return ({
+        type: UserActionTypes.RENAME_CAT,
+        name,
+        category
 })};
 
 export const switchCategory = (category) => {
     return ({
     type: UserActionTypes.SWITCH_CAT,
     category
+})};
+
+export const changeTaskCategory = (category, task) => {
+    return ({
+    type: UserActionTypes.CHANGE_TASK_CAT,
+    task,
+    category
+})};
+
+export const changeTaskTitle = (task, newTitle) => {
+    return ({
+    type: UserActionTypes.CHANGE_TASK_TITLE,
+    task,
+    newTitle
+})};
+
+export const setTaskDescription = (task, description) => {
+    return ({
+    type: UserActionTypes.SET_TASK_DESCRIPTION,
+    task,
+    description
 })};
 
 export const changeCategoryColor = (color, category) => {

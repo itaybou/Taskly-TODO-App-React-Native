@@ -58,6 +58,8 @@ class AddCategoryModal extends React.PureComponent {
                         style={{ width: '80%', fontSize: 18 }}
                         value={this.state.input}
                         label="Category name:"
+                        labelStyle={{color: theme.secondary_text}}
+                        inputStyle={{color: theme.primary_text, fontSize: 14}}
                         placeholder="Enter new category name"
                         placeholderTextColor="#c7c7c7"
                         underlineColorAndroid='transparent'
@@ -67,7 +69,7 @@ class AddCategoryModal extends React.PureComponent {
                             <Icon
                                 name='playlist-add'
                                 type='material'
-                                color='#000000'
+                                color={theme.icons}
                             />
                         }
                         errorStyle={{ color: 'red' }}
@@ -76,16 +78,16 @@ class AddCategoryModal extends React.PureComponent {
                                             "Please enter category name" : `Maximum category name is ${maxCategoryNameLength} characters.` 
                                             : ""}
                     />
-                    <View style={{width: '100%', flex:1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <View style={{width: '100%', flex:1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end'}}>
                         <TouchableOpacity onPress={this.closeModal}>
                             <Icon
                                 name='x'
                                 type='feather'
-                                color='#000000'
+                                color={theme.icons}
                             />
                         </TouchableOpacity>
                         <View>
-                            <Text style={{marginRight: 5}}>Category color:</Text>
+                            <Text style={{color: theme.primary_text, marginRight: 5}}>Category color:</Text>
                             <TouchableOpacity onPress={this.toggleColorPick}>
                                     <Icon
                                         containerStyle={style.taskIcons}
@@ -100,12 +102,12 @@ class AddCategoryModal extends React.PureComponent {
                             <Icon
                                 name='check'
                                 type='feather'
-                                color='#000000'
+                                color={theme.icons}
                             />
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
-                <ColorPickModal isVisible={this.state.isColorPickVisible} setColor={this.setCategoryColor} toggle={this.toggleColorPick} defaultColor={'#DDDDDD'} title={this.state.input}/>
+                <ColorPickModal isVisible={this.state.isColorPickVisible} setColor={this.setCategoryColor} toggle={this.toggleColorPick} defaultColor={this.state.color} title={this.state.input}/>
             </Modal>
         )
     }
@@ -127,7 +129,7 @@ const styles = (theme) => StyleSheet.create({
 
     content: {
         height: Dimensions.get('window').height * 0.25,
-        backgroundColor: 'white',
+        backgroundColor: theme.background,
         padding: 22,
         justifyContent: 'center',
         alignItems: 'center',

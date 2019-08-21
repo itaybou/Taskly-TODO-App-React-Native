@@ -33,7 +33,6 @@ class CategoryDrawer extends React.Component {
     toggleAddCategoryModal = () => {
         this.setState({ isAddVisible: !this.state.isAddVisible });
     };
-
     
     changeTheme = () => {
         const next_theme = this.props.theme.name === THEME_TYPE.LIGHT ? THEME_TYPE.DARK : THEME_TYPE.LIGHT;
@@ -80,7 +79,7 @@ class CategoryDrawer extends React.Component {
                     }
                 />
                 <View style={{flex: 0.2, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginStart: 10, backgroundColor: theme.background}}>    
-                <TouchableOpacity 
+                    <TouchableOpacity 
                         style={style.button} 
                         onPress={this.changeTheme}>
                         <Icon

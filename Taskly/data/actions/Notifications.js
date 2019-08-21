@@ -30,11 +30,9 @@ export const askPermissions = async () => {
     return true;
 };
 
-
 const handleNotification = ({origin, data}) => {
     if(origin === 'selected') {
         popup.show({
-            onPress: function() {console.log('Pressed')},
             appIconSource: require('../../assets/icon.png'),
             appTitle: 'Taskly',
             timeText: 'Now',
@@ -59,7 +57,7 @@ export const parseDateFromDDMMYYYYHHmm = (datetimeString) => {
 export const sendScheduledNotification = async (title, body, data, datetimeString, millisecond_offset) => {
     let notification_id = 'none';
     const parsed_date = parseDateFromDDMMYYYYHHmm(datetimeString).getTime() - millisecond_offset;
-    if(parsed_date > 0) {
+    if(parsed_date > Date.now()) {
         const localNotification = {
             title: title,
             body: body,
@@ -76,13 +74,11 @@ export const sendScheduledNotification = async (title, body, data, datetimeStrin
         const schedulingOptions = {
             time: parsed_date
         }
-        console.log('Scheduling delayed notification:', { localNotification, schedulingOptions })
         await Notifications.scheduleLocalNotificationAsync(localNotification, schedulingOptions)
             .then(id => {
                 notification_id = id;
             })
             .catch(err => console.error(err))
-        console.log(notification_id);
         return notification_id; // If equal to 'none' we have an error.
     } else {
         return 'illegal';
@@ -91,5 +87,4 @@ export const sendScheduledNotification = async (title, body, data, datetimeStrin
 
 export const cancelScheduledNotification = (notification_id) => {
     Notifications.dismissNotificationAsync(notification_id);
-    console.log(notification_id);
 }
