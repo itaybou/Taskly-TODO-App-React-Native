@@ -26,10 +26,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.android.taskly"
+      "bundleIdentifier": "com.taskly.taskly"
     },
     "android": {
-      "package": "com.android.taskly"
+      "package": "com.taskly.taskly"
     }
   }
 }
