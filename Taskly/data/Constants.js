@@ -1,6 +1,6 @@
 import { Dimensions, Platform } from "react-native";
 
-export const VERSION = 'Beta 1.0.0';
+export const VERSION = 'Beta 0.0.2';
 export const GITHUB = 'github.com/itaybou';
 
 export const FilterTabs = {

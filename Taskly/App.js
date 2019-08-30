@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux'
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, I18nManager } from 'react-native';
 import Navigator from './navigation/Navigator';
 import { PersistGate } from 'redux-persist/integration/react'
 import { data, persistor } from './data/Data';
@@ -16,7 +16,11 @@ export default class App extends React.Component {
       theme: data.getState().theme
     };
 
-  async componentWillMount() {
+    componentWillMount() {
+      I18nManager.allowRTL(false);
+    }
+
+  async componentDidMount() {
       await askPermissions();
   }
 

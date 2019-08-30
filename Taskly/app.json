@@ -10,7 +10,10 @@
       "android",
       "web"
     ],
-    "version": "Beta 0.0.1",
+    "notification": {
+      "icon": "./assets/icon.png"
+    },
+    "version": "Beta 0.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -29,7 +32,8 @@
       "bundleIdentifier": "com.taskly.taskly"
     },
     "android": {
-      "package": "com.taskly.taskly"
+      "package": "com.taskly.taskly",
+      "versionCode": 2
     }
   }
 }

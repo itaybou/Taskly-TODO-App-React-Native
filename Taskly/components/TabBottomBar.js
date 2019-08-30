@@ -1,7 +1,7 @@
 import React from "react";
 import posed from "react-native-pose";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { TabCount, windowWidth, FilterTabs } from '../data/Constants'
+import { TabCount, windowWidth } from '../data/Constants'
 import { changeVisibility } from "../data/actions/Actions";
 import { connect } from 'react-redux'
 import { withTheme } from '../data/Theme'

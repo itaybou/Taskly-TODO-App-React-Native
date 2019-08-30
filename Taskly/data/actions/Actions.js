@@ -1,4 +1,4 @@
-import { UserActionTypes, defaultCategoryColor } from '../Constants'
+import { UserActionTypes } from '../Constants'
 
 const getCurrentDateFormatted = (datetime) => {
     const twoDigitFormat = (number) => (number <= 9) ? '0' + number : number;

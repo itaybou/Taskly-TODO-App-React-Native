@@ -5,4 +5,3 @@ const TaskScreen = (props) =>
     <AppContainer navigation={props.navigation} {...props} />;
 
 export default TaskScreen;
-    

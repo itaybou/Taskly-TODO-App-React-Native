@@ -266,7 +266,6 @@ class EditTaskScreen extends React.Component {
     }
 
     getNotificationTime(prev_due) {
-        console.log(this.props.item);
         const notification = moment(this.props.item.due_date !== '' ? this.props.item.due_date : prev_due, 'DD-MM-YYYY HH:mm').toDate().getTime() - this.props.item.notification.notify_ahead;
         const date = new Date(notification);
         if(date.getTime() < (new Date()).getTime()) {

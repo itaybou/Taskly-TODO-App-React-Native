@@ -1,6 +1,6 @@
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
-import { Notifications, Platform } from 'expo';
+import { Notifications } from 'expo';
 import { isANDROID } from '../../data/Constants'
 
 let popup = null;
@@ -68,7 +68,8 @@ export const sendScheduledNotification = async (title, body, data, datetimeStrin
             },
             android: {
                 channelId: 'due-tasks',
-                color: 'yellow'
+                color: 'yellow',
+                icon: './assets/images/icon.png'
             },
         }
         const schedulingOptions = {
